@@ -12,11 +12,7 @@ type User struct {
   PwdHash     []byte
 }
 
-func FetchUid(uid string) (*User, error) {
-  c, err := redis.Dial("tcp", ":6379")
-  if err != nil {
-    return nil, err
-  }
+func FetchUid(c redis.Conn, uid string) (*User, error) {
   user := User{}
   v, errb := redis.Values(c.Do("HGETALL", uid))
   if errb != nil {
@@ -41,7 +37,7 @@ func (self *User) String() string {
   }
 }
 
-func (self *User) Validate(v *revel.Validation) {
+func (self *User) Validate(c redis.Conn, v *revel.Validation) {
 
   // check email sanity
   v.Check(self.Email, 
@@ -52,7 +48,7 @@ func (self *User) Validate(v *revel.Validation) {
 
   // if above validations check run the email uniqueness check
   if(v.HasErrors() == false) {
-    v.Required(self.EmailDoesNotExist()).Key("user.Email").Message("Email Already Exists")
+    v.Required(self.EmailDoesNotExist(c)).Key("user.Email").Message("Email Already Exists")
   }
 }
 
@@ -60,11 +56,7 @@ func (self *User) Id() string {
   return fmt.Sprintf("user:%s", self.Email)
 }
 
-func (self *User) EmailDoesNotExist() bool {
-  c, err := redis.Dial("tcp", ":6379")
-  if err != nil {
-    panic("data access problem")
-  }
+func (self *User) EmailDoesNotExist(c redis.Conn) bool {
   exists, err := redis.Bool(c.Do("EXISTS", self.Id()))
   if err != nil {
     panic("data access problem")
@@ -75,15 +67,10 @@ func (self *User) EmailDoesNotExist() bool {
   return true
 }
 
-func (self User) Insert() bool {
+func (self User) Insert(c redis.Conn) bool {
   // TODO
   // add email regex
-  // add redis to config somewhere
 
-  c, err := redis.Dial("tcp", ":6379")
-  if err != nil {
-    panic("data access problem")
-  }
   _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(&self)...)
   if errb != nil {
     panic("data access problem")

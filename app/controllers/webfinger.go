@@ -3,7 +3,7 @@ package controllers
 import "github.com/robfig/revel"
 
 type Webfinger struct {
-  Kernl
+  *revel.Controller
 }
 
 type Link struct {

@@ -6,7 +6,7 @@ import "kernl/app/models"
 import "strings"
 
 type Users struct {
-  *revel.Controller
+  Kernl
 }
 
 func (c Users) New() revel.Result {
@@ -19,6 +19,10 @@ func (c Users) Create(Email string,
 // to print to log
 //          revel.INFO.Println("hello")
 
+      // get redis handle
+      rc := GetRedisConn()
+      defer rc.Close()
+
       user := models.User{}
       user.Email = strings.ToLower(Email)
 
@@ -27,7 +31,7 @@ func (c Users) Create(Email string,
       c.Validation.Required(PasswordConfirmation == Password).Message("Password does not match")
 
       // validate user model
-      user.Validate(c.Validation)
+      user.Validate(rc, c.Validation)
 
       // shows errs if any
       if c.Validation.HasErrors() {
@@ -37,7 +41,7 @@ func (c Users) Create(Email string,
       }
 
       user.PwdHash, _ = bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
-      err := user.Insert()
+      err := user.Insert(rc)
       if err != true {
         panic("oh no")
       }

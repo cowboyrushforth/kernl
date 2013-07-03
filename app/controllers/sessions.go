@@ -6,7 +6,7 @@ import "kernl/app/models"
 import "fmt"
 
 type Sessions struct {
-  *revel.Controller
+  Kernl
 }
 
 func (c Sessions) New() revel.Result {
@@ -15,8 +15,10 @@ func (c Sessions) New() revel.Result {
 
 func (c Sessions) Create(Email string, Password string) revel.Result {
   // TODO Validations
+  rc := GetRedisConn()
+  defer rc.Close()
   uid := fmt.Sprintf("user:%s", Email) 
-  u, err := models.FetchUid(uid)
+  u, err := models.FetchUid(rc, uid)
   if err == nil {
     errb := bcrypt.CompareHashAndPassword(u.PwdHash, []byte(Password))
     if errb == nil {
