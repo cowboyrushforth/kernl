@@ -30,7 +30,7 @@ func (c Connections) Verify(q string) revel.Result {
 
   client := webfinger.NewClient(nil)
 
-  resource, err := client.Lookup("r2d2@joindiaspora.com", []string{})
+  resource, err := client.Lookup(q, []string{})
   if err != nil {
     has_errors := true
     return c.Render(has_errors)
