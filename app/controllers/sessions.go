@@ -6,7 +6,7 @@ import "kernl/app/models"
 import "fmt"
 
 type Sessions struct {
-        *revel.Controller
+  *revel.Controller
 }
 
 func (c Sessions) New() revel.Result {
@@ -14,21 +14,21 @@ func (c Sessions) New() revel.Result {
 }
 
 func (c Sessions) Create(Email string, Password string) revel.Result {
-        // TODO Validations
-        uid := fmt.Sprintf("user:%s", Email) 
-        u, err := models.FetchUid(uid)
-        if err == nil {
-                errb := bcrypt.CompareHashAndPassword(u.PwdHash, []byte(Password))
-                if errb == nil {
-                        c.Session["uid"] = uid
-                        c.Flash.Success("Welcome, " + u.Email)
-                        return c.Redirect(Home.Index)
-                } 
-        }
+  // TODO Validations
+  uid := fmt.Sprintf("user:%s", Email) 
+  u, err := models.FetchUid(uid)
+  if err == nil {
+    errb := bcrypt.CompareHashAndPassword(u.PwdHash, []byte(Password))
+    if errb == nil {
+      c.Session["uid"] = uid
+      c.Flash.Success("Welcome, " + u.String())
+      return c.Redirect(Home.Index)
+    } 
+  }
 
-        c.Flash.Out["username"] = Email
-        c.Flash.Error("Login Failed")
-        return c.Redirect(Sessions.New)
+  c.Flash.Out["username"] = Email
+  c.Flash.Error("Login Failed")
+  return c.Redirect(Sessions.New)
 }
 
 func (c Sessions) Destroy() revel.Result {

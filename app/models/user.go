@@ -6,9 +6,10 @@ import "github.com/robfig/revel"
 import "errors"
 
 type User struct {
-        DisplayName  string
-        Email        string
-        PwdHash     []byte
+  DisplayName  string
+  Email        string
+  Slug         string
+  PwdHash     []byte
 }
 
 func FetchUid(uid string) (*User, error) {
@@ -32,23 +33,27 @@ func FetchUid(uid string) (*User, error) {
   return &user, nil
 }
 
-func (u *User) String() string {
-        return fmt.Sprintf("User(%s)", u.Email)
+func (self *User) String() string {
+  if len(self.DisplayName) > 0 {
+    return self.DisplayName
+  } else {
+    return self.Email
+  }
 }
 
 func (self *User) Validate(v *revel.Validation) {
 
-        // check email sanity
-        v.Check(self.Email, 
-          revel.Required{},
-          revel.MaxSize{100},
-          revel.MinSize{5},
-        ).Key("user.Email")
+  // check email sanity
+  v.Check(self.Email, 
+    revel.Required{},
+    revel.MaxSize{100},
+    revel.MinSize{5},
+  ).Key("user.Email")
 
-        // if above validations check run the email uniqueness check
-        if(v.HasErrors() == false) {
-          v.Required(self.EmailDoesNotExist()).Key("user.Email").Message("Email Already Exists")
-        }
+  // if above validations check run the email uniqueness check
+  if(v.HasErrors() == false) {
+    v.Required(self.EmailDoesNotExist()).Key("user.Email").Message("Email Already Exists")
+  }
 }
 
 func (self *User) Id() string {
@@ -65,15 +70,15 @@ func (self *User) EmailDoesNotExist() bool {
     panic("data access problem")
   }
   if exists {
-     return false
+    return false
   }
   return true
 }
 
 func (self User) Insert() bool {
-// TODO
-// add email regex
-// add redis to config somewhere
+  // TODO
+  // add email regex
+  // add redis to config somewhere
 
   c, err := redis.Dial("tcp", ":6379")
   if err != nil {

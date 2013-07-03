@@ -15,13 +15,17 @@
     {{end}}
   </head>
   <body>
-    {{if .current_user}}
+    {{if .user}}
     <div class="navbar">
       <div class="navbar-inner">
         <a class="brand" href="/">kernl.</a>
         <ul class="nav">
-          <li><a href="#">me</a></li>
-          <li><a href="#">preferences</a></li>
+          <li><a href="/">feed</a></li>
+          <li><a href="/{{.user.Slug}}">my page</a></li>
+        </ul>
+        <ul class="nav pull-right">
+          <li><a>{{.user.Email}}</a></li>
+          <li><a href="/settings">Settings</a></li>
           <li><a href="/logout">Logout</a></li>
         </ul>
       </div>
