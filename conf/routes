@@ -5,26 +5,22 @@
 module:testrunner
 
 GET     /                                       Kernl.Index
-
 GET     /home                                   Home.Index
-
+GET     /.well-known/host-meta                  Webfinger.Index
+GET     /wf                                     Webfinger.Show
+GET     /connections                            Connections.Index
+GET     /connections/new                        Connections.New
+GET     /connections/verify                     Connections.Verify
+POST    /connections                            Connections.Create
 GET     /login                                  Sessions.New
-
 GET     /join                                   Users.New
-
 POST    /join                                   Users.Create
-
 POST    /login                                  Sessions.Create
-
 GET     /logout                                 Sessions.Destroy
-
 GET     /about                                  Content.About
-
 # Ignore favicon requests
 GET     /favicon.ico                            404
-
 # Map static resources from the /app/public folder to the /public path
 GET     /public/*filepath                       Static.Serve("public")
-
 # Catch all
 *       /:controller/:action                    :controller.:action
