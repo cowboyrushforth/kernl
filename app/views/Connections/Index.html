@@ -1,0 +1,27 @@
+{{set . "title" "kernl - connections"}}
+{{template "header.html" .}}
+
+<div class="container">
+  <div class="row">
+    <form method="get" action="/connections/verify">
+      Verify and Add User: <input name="q" type="text" /> <input type="submit" value="Go" />
+    </form>
+  </div>
+  <div class="row">
+    <div class="span12">
+      <table class="table table-bordered">
+
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="span6">
+      {{template "flash.html" .}}
+    </div>
+  </div>
+</div>
+
+{{template "footer.html" .}}
