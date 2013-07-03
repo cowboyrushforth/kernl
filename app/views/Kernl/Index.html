@@ -1,0 +1,32 @@
+{{set . "title" "kernl."}}
+{{template "header.html" .}}
+
+<div class="hero-unit">
+  <h1>kernl.</h1>
+  <p>a social network for the rest of us  </p>
+  <p>
+    <a href="/login" class="btn btn-primary btn-large">
+      login 
+    </a>
+    <a href="/join" class="btn btn-success btn-large">
+      join
+    </a>
+    <a href="/start_your_own" class="btn btn-warning btn-large">
+      start your own 
+    </a>
+    <a href="/about" class="btn btn-info btn-large">
+      about 
+    </a>
+  </p>
+</div>
+
+
+<div class="container">
+  <div class="row">
+    <div class="span6">
+      {{template "flash.html" .}}
+    </div>
+  </div>
+</div>
+
+{{template "footer.html" .}}

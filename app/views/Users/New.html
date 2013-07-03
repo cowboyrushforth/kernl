@@ -1,0 +1,33 @@
+{{set . "title" "Home"}}
+{{template "header.html" .}}
+
+<h1>join us</h1>
+
+
+{{if .errors}}Please fix errors marked below!{{end}}
+
+<form method="POST" action="{{url "Users.Create"}}">
+  <p class="{{if index .errors "user.Email"}}error{{end}}">
+    <strong>Email:</strong> 
+    <input type="text" name="Email" value="{{index .flash "Email"}}" />
+    <span class="error">{{index .errors "user.Email"}}</span>
+  </p>
+
+  <p class="{{if .errors.Password}}error{{end}}">
+    <strong>Password:</strong> 
+    <input type="password" name="Password" />
+    <span class="error">{{.errors.Password.Message}}</span>
+  </p>
+
+  <p class="{{if .errors.PasswordConfirmation}}error{{end}}">
+    <strong>Password Confirmation:</strong> 
+    <input type="password" name="PasswordConfirmation" />
+    <span class="error">{{.errors.PasswordConfirmation.Message}}</span>
+  </p>
+
+  <p class="buttons">
+    <input type="submit" value="Signup">
+  </p>
+</form>
+
+{{template "footer.html" .}}

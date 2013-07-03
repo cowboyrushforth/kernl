@@ -1,0 +1,37 @@
+{{set . "title" "kernl - login"}}
+{{template "header.html" .}}
+
+<h1>login</h1>
+
+
+{{if .errors}}Please fix errors marked below!{{end}}
+
+<form method="POST" action="{{url "Sessions.Create"}}">
+  <p class="{{if index .errors "Email"}}error{{end}}">
+    <strong>Email:</strong> 
+    <input type="text" name="Email" value="{{index .flash "Email"}}" />
+    <span class="error">{{index .errors "Email"}}</span>
+  </p>
+
+  <p class="{{if .errors.Password}}error{{end}}">
+    <strong>Password:</strong> 
+    <input type="password" name="Password" />
+    <span class="error">{{.errors.Password.Message}}</span>
+  </p>
+
+  <p class="buttons">
+    <input type="submit" value="Login">
+  </p>
+</form>
+
+<div class="container">
+  <div class="row">
+    <div class="span6">
+      {{template "flash.html" .}}
+    </div>
+  </div>
+</div>
+
+
+
+{{template "footer.html" .}}

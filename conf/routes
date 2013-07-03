@@ -4,7 +4,21 @@
 
 module:testrunner
 
-GET     /                                       App.Index
+GET     /                                       Kernl.Index
+
+GET     /home                                   Home.Index
+
+GET     /login                                  Sessions.New
+
+GET     /join                                   Users.New
+
+POST    /join                                   Users.Create
+
+POST    /login                                  Sessions.Create
+
+GET     /logout                                 Sessions.Destroy
+
+GET     /about                                  Content.About
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

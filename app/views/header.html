@@ -8,10 +8,22 @@
     <link rel="shortcut icon" type="image/png" href="/public/images/favicon.png">
     <script src="/public/js/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
     {{range .moreStyles}}
-      <link rel="stylesheet" type="text/css" href="/public/{{.}}">
+    <link rel="stylesheet" type="text/css" href="/public/{{.}}">
     {{end}}
     {{range .moreScripts}}
-      <script src="/public/{{.}}" type="text/javascript" charset="utf-8"></script>
+    <script src="/public/{{.}}" type="text/javascript" charset="utf-8"></script>
     {{end}}
   </head>
   <body>
+    {{if .current_user}}
+    <div class="navbar">
+      <div class="navbar-inner">
+        <a class="brand" href="/">kernl.</a>
+        <ul class="nav">
+          <li><a href="#">me</a></li>
+          <li><a href="#">preferences</a></li>
+          <li><a href="/logout">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+    {{end}}
