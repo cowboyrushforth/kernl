@@ -1,10 +1,32 @@
 {{set . "title" "kernl - connections"}}
 {{template "header.html" .}}
 
+{{if .has_errors }}
+We can not find that user right now, please check the address or try again later.
+{{else}}
 <div class="container">
   <div class="row">
+        <table class="table table-bordered">
+                <tr>
+                        <th>User</th><td>{{.subject}}</td>
+                </tr>
+                <tr>
+                        <th>Profile</th><td><a href="{{.profile_href}}" target="_blank">{{.profile_href}}</a></td>
+                </tr>
+                <tr>
+                        <th>Hcard</th><td>{{raw .hcard_body}}</td>
+                </tr>
+                        
+                <tr>
+                        <th>Server</th><td><a href="{{.seed_href}}" target="_blank">{{.seed_href}}</a></td>
+                </tr>
+                <tr>
+                        <th>Remote Guid</th><td>{{.guid}}</td>
+                </tr>
+        </table>
   </div>
 </div>
+{{end}}
 
 <div class="container">
   <div class="row">
