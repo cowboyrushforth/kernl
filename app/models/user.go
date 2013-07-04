@@ -10,6 +10,8 @@ type User struct {
   Email        string
   Slug         string
   PwdHash     []byte
+  RSAKey      string
+  AccountIdentifier string
 }
 
 func FetchUid(c redis.Conn, uid string) (*User, error) {

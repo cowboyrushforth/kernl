@@ -3,6 +3,7 @@ package controllers
 import "github.com/robfig/revel"
 import "github.com/cowboyrushforth/go-webfinger"
 import "github.com/cowboyrushforth/go-webfinger/jrd"
+import "kernl/app/models"
 import "net/http"
 import "io/ioutil"
 
@@ -83,11 +84,20 @@ func (c Connections) Verify(q string) revel.Result {
   }
   hcard_body := string(hcard_bytes)
 
-
-
+  // render all of the info into a template
   return c.Render(subject, profile_href, hcard_href, hcard_body, seed_href, guid)
 }
 
-func (c Connections) Create() revel.Result {
-  return c.Render()
+func (c Connections) Create(person models.Person) revel.Result {
+  // XXX: check validation
+  // send salmon message to remote party
+
+  success := false
+  err := person.Connect(c.current_user()) 
+  if err == nil {
+    success = true
+  }
+
+  // if sharing message goes thru save connection
+  return c.Render(success)
 }
