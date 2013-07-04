@@ -2,6 +2,7 @@ package controllers
 
 import "github.com/robfig/revel"
 import "github.com/cowboyrushforth/go-webfinger"
+import "github.com/cowboyrushforth/go-webfinger/jrd"
 import "net/http"
 import "io/ioutil"
 
@@ -30,7 +31,16 @@ func (c Connections) Verify(q string) revel.Result {
 
   client := webfinger.NewClient(nil)
 
-  resource, err := client.Lookup(q, []string{})
+  insecure_fingering := revel.Config.BoolDefault("auth.allow_unsecure_fingering", false)
+
+  err := error(nil)
+  resource := &jrd.JRD{}
+  if insecure_fingering {
+    resource, err = client.LookupInsecure(q, []string{})
+  } else {
+    resource, err = client.Lookup(q, []string{})
+  }
+
   if err != nil {
     has_errors := true
     return c.Render(has_errors)
