@@ -6,7 +6,7 @@ import "crypto/cipher"
 import "crypto/aes"
 import "crypto/x509"
 import "crypto/rsa"
-import "crypto/sha1"
+//import "crypto/sha1"
 import "crypto/rand"
 import "encoding/base64"
 import "encoding/pem"
@@ -129,8 +129,11 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
   if(pubkeyerr != nil) {
     panic("could not parse public key")
   }
-  hash := sha1.New()
-  enc_outer_bundle, outer_bundle_err := rsa.EncryptOAEP(hash, rand.Reader, pubkey.(*rsa.PublicKey), []byte(outer_bundle), nil)
+  //hash := sha1.New()
+
+  // NEED PKCS1_PADDING HERE
+   enc_outer_bundle, outer_bundle_err := rsa.EncryptPKCS1v15(rand.Reader, pubkey.(*rsa.PublicKey), []byte(outer_bundle))
+//  enc_outer_bundle, outer_bundle_err := rsa.EncryptOAEP(hash, rand.Reader, pubkey.(*rsa.PublicKey), []byte(outer_bundle), nil)
   if outer_bundle_err != nil {
     panic(outer_bundle_err)
   }
