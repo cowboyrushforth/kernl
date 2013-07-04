@@ -13,7 +13,8 @@ func (c Users) New() revel.Result {
   return c.Render()
 }
 
-func (c Users) Create(Email string, 
+func (c Users) Create(Slug string,
+                      Email string, 
                       Password string, 
                       PasswordConfirmation string) revel.Result {
 // to print to log
@@ -24,6 +25,7 @@ func (c Users) Create(Email string,
       defer rc.Close()
 
       user := models.User{}
+      user.Slug = strings.ToLower(Slug)
       user.Email = strings.ToLower(Email)
 
       // add validation for password

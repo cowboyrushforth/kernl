@@ -18,11 +18,15 @@ type Person struct {
 func (self *Person) Connect(user *User) (error) {
   // XXX validation?
 //  if(self.IsLocal() == false) {
-    err := SendSharingNotification(user, self)
+    result, err := SendSharingNotification(user, self)
     if err != nil {
       panic(err)
     }
-    panic("implement datastore write")
+    if result.StatusCode == 200 || result.StatusCode == 202 {
+     panic("implement datastore write")
+    } else {
+      panic("received: "+result.Status)
+    }
  // }
   return nil
 }

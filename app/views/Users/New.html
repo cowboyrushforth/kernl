@@ -7,6 +7,12 @@
 {{if .errors}}Please fix errors marked below!{{end}}
 
 <form method="POST" action="{{url "Users.Create"}}">
+  <p class="{{if index .errors "user.Slug"}}error{{end}}">
+    <strong>Slug:</strong> 
+    <input type="text" name="Slug" value="{{index .flash "Slug"}}" />
+    <span class="error">{{index .errors "user.Slug"}}</span>
+  </p>
+
   <p class="{{if index .errors "user.Email"}}error{{end}}">
     <strong>Email:</strong> 
     <input type="text" name="Email" value="{{index .flash "Email"}}" />

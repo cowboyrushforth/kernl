@@ -4,52 +4,19 @@ import "github.com/cowboyrushforth/gosalmon"
 import "strings"
 import "crypto/cipher"
 import "crypto/aes"
-import "crypto/sha256"
 import "crypto/x509"
 import "crypto/rsa"
 import "crypto/sha1"
 import "crypto/rand"
-import "math/big"
 import "encoding/base64"
-import "encoding/hex"
 import "encoding/pem"
 import "net/http"
 import "net/url"
 
-
-func RandomString(n int) string {
-    const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    symbols := big.NewInt(int64(len(alphanum)))
-    states := big.NewInt(0)
-    states.Exp(symbols, big.NewInt(int64(n)), nil)
-    r, err := rand.Int(rand.Reader, states)
-    if err != nil {
-        panic(err)
-    }
-    var bytes = make([]byte, n)
-    r2 := big.NewInt(0)
-    symbol := big.NewInt(0)
-    for i := range bytes {
-        r2.DivMod(r, symbols, symbol)
-        r, r2 = r2, r
-        bytes[i] = alphanum[symbol.Int64()]
-    }
-    return string(bytes)
-}
-
-func RandomSHA256() string {
-  hash := sha256.New()
-  hash.Write([]byte(RandomString(64)))
-  md := hash.Sum(nil)
-  mdStr := hex.EncodeToString(md)
-  return mdStr
-}
-
-
 // sends a 'start sharing' notification from
 // the owner of this person entry to the person 
 // described in it
-func SendSharingNotification(user *User, person *Person) error {
+func SendSharingNotification(user *User, person *Person)  (resp *http.Response, err error) {
   template := `<XML>
   <post>
     <request>
@@ -74,16 +41,14 @@ func SendSharingNotification(user *User, person *Person) error {
   }
   xml := salmon.EncodeToXml()
   salmon_endpoint := person.PodUrl + "/receive/users/" + person.RemoteGuid
-  send_err := sendPreparedSalmon(xml, salmon_endpoint)
-  return send_err
+  return sendPreparedSalmon(xml, salmon_endpoint)
 }
 
-func sendPreparedSalmon(xml string, salmon_endpoint string) error {
+func sendPreparedSalmon(xml string, salmon_endpoint string) (resp *http.Response, err error) {
   v := url.Values{}
   v.Set("xml", xml)
   v.Encode()
-  _, err := http.PostForm(salmon_endpoint, v)
-  return err
+  return http.PostForm(salmon_endpoint, v)
 }
 
 func generateEncryptedPayload(payload string, inner_iv []byte, inner_key []byte) string {
