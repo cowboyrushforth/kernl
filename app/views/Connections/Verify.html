@@ -24,6 +24,18 @@ We can not find that user right now, please check the address or try again later
                         <th>Remote Guid</th><td>{{.guid}}</td>
                 </tr>
         </table>
+        <form method="post" action="/connections">
+          <input type="hidden" name="person.LocalGuid" value="{{.user.Guid}}" />
+          <input type="hidden" name="person.RemoteGuid" value="{{.guid}}" />
+          <input type="hidden" name="person.DisplayName" value="{{.subject}}" />
+          <input type="hidden" name="person.ImageSrc" value=""/>
+          <input type="hidden" name="person.PodUrl" value="{{.seed_href}}" />
+          <input type="hidden" name="person.ProfileUrl" value="{{.profile_href}}" />
+          <input type="hidden" name="person.Email" value="" />
+          <input type="hidden" name="person.RSAPubKey" value="{{.pubkey}}" />
+          <input type="hidden" name="person.AccountIdentifier" value="{{.subject}}" />
+          <input type="submit" value="Connect" />
+        </form>
   </div>
 </div>
 {{end}}

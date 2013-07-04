@@ -11,6 +11,7 @@ type User struct {
   Slug         string
   PwdHash     []byte
   RSAKey      string
+  Guid        string
   AccountIdentifier string
 }
 

@@ -1,5 +1,5 @@
 package models
-
+import "fmt"
 import "github.com/cowboyrushforth/gosalmon"
 import "strings"
 import "crypto/cipher"
@@ -88,8 +88,8 @@ func sendPreparedSalmon(xml string, salmon_endpoint string) error {
 
 func generateEncryptedPayload(payload string, inner_iv []byte, inner_key []byte) string {
   // sanity check
-  if len(payload)%aes.BlockSize != 0 {
-    panic("dec_header is not a multiple of the block size")
+  for (len(payload)%aes.BlockSize != 0) { 
+    payload = payload + "0"
   }
   block, block_err := aes.NewCipher(inner_key)
   if block_err != nil {
@@ -114,9 +114,9 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
 </decrypted_header>`
 
 
-  inner_key := []byte(RandomSHA256())
+  inner_key := []byte(RandomSHA256()[0:32])
   inner_iv  := []byte(RandomString(16))
-  outer_key := []byte(RandomSHA256())
+  outer_key := []byte(RandomSHA256()[0:32])
   outer_iv  := []byte(RandomString(16))
 
   dec_header := strings.Replace(template, "$inner_iv", base64.StdEncoding.EncodeToString(inner_iv), 1)
@@ -124,12 +124,12 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
   dec_header = strings.Replace(dec_header, "$display_name", user.DisplayName, 1)
   dec_header = strings.Replace(dec_header, "$identifier", user.AccountIdentifier, 1)
 
-  // XXX : PADDING
 
   // sanity check
-  if len(dec_header)%aes.BlockSize != 0 {
-    panic("dec_header is not a multiple of the block size")
+  for (len(dec_header)%aes.BlockSize != 0) { 
+    dec_header = dec_header + "0"
   }
+
   // make block
   header_block, header_err := aes.NewCipher(outer_key)
   if header_err != nil {
@@ -151,7 +151,12 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
                                  base64.StdEncoding.EncodeToString(outer_key), 1)
 
   // encrypt outer bundle using recipients public key
-  p, _ := pem.Decode([]byte(person.RSAPubKey))
+  braw, _ := base64.StdEncoding.DecodeString(person.RSAPubKey)
+  fmt.Println("wheee")
+  fmt.Println(person.RSAPubKey)
+  fmt.Println(string(braw))
+  fmt.Println("wheee")
+  p, _ := pem.Decode(braw)
   if p == nil {
     panic("could not parse public key")
   }

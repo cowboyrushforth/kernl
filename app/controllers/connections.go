@@ -84,8 +84,14 @@ func (c Connections) Verify(q string) revel.Result {
   }
   hcard_body := string(hcard_bytes)
 
+  pubkey := ""
+  pubkey_link := resource.GetLinkByRel("diaspora-public-key")
+  if pubkey_link != nil {
+    pubkey = pubkey_link.Href
+  }
+
   // render all of the info into a template
-  return c.Render(subject, profile_href, hcard_href, hcard_body, seed_href, guid)
+  return c.Render(subject, profile_href, hcard_href, hcard_body, seed_href, guid, pubkey)
 }
 
 func (c Connections) Create(person models.Person) revel.Result {

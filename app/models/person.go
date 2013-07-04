@@ -17,13 +17,13 @@ type Person struct {
 // datastore write
 func (self *Person) Connect(user *User) (error) {
   // XXX validation?
-  if(self.IsLocal() == false) {
+//  if(self.IsLocal() == false) {
     err := SendSharingNotification(user, self)
     if err != nil {
       panic(err)
     }
     panic("implement datastore write")
-  }
+ // }
   return nil
 }
 
