@@ -8,8 +8,10 @@ import "time"
 var redisPool *redis.Pool
 
 func Init() {
+  redis_host := revel.Config.StringDefault("redis.host", "127.0.0.1")
+  redis_port := revel.Config.StringDefault("redis.port", "6379")
   redisPool = redis.NewPool(func() (redis.Conn, error) {
-    c, err := redis.Dial("tcp", ":6379")
+    c, err := redis.Dial("tcp", redis_host+":"+redis_port)
     if err != nil {
       return nil, err
     }

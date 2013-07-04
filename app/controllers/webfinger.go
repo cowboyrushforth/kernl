@@ -23,9 +23,10 @@ type XRD struct {
 }
 
 func (c Webfinger) Index() revel.Result {
-  // TODO: use server config for hostname
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
+
   link := Link{Rel: "ldd", 
-               Template: "http://localhost:9000/wf?q={uri}",
+               Template: host_prefix+"/wf?q={uri}",
                Xtype: "application/xrd+xml",
                Title: "Webfinger Template"}
 
@@ -37,14 +38,14 @@ func (c Webfinger) Index() revel.Result {
 }
 
 func (c Webfinger) Show() revel.Result {
-  // TODO: use server config for hostname
   // TODO: lookup email, print out slug
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
 
   link := Link{Rel: "http://microformats.org/profile/hcard",
-              Href: "http://localhost:9000/users/scott"}
+              Href: host_prefix+"/users/scott"}
 
   xrd := XRD{Xmlns: "http://docs.oasis-open.org/ns/xri/xrd-1.0",
-             Alias: "http://localhost:9000/users/scott",
+             Alias: host_prefix+"/users/scott",
              Link: link}
   return c.RenderXml(xrd)
 }
