@@ -76,7 +76,11 @@ func (self *User) Id() string {
   return fmt.Sprintf("user:%s", self.Slug)
 }
 
-func (self User) Insert(c redis.Conn) bool {
+func (self *User) ConnectionsKey() string {
+  return fmt.Sprintf("connections:%s", self.Id())
+}
+
+func (self *User) Insert(c redis.Conn) bool {
   // TODO
   // add email regex
   // wrap in redis multi
@@ -92,7 +96,7 @@ func (self User) Insert(c redis.Conn) bool {
   if erra != nil {
     panic("data access problem")
   }
-  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(&self)...)
+  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
   if errb != nil {
     panic("data access problem")
   }
@@ -102,7 +106,7 @@ func (self User) Insert(c redis.Conn) bool {
 
 // returns users public key in der
 // encoded format
-func (self User) RSAPubKey() string {
+func (self *User) RSAPubKey() string {
   // decode private key
   p, _ := pem.Decode([]byte(self.RSAKey))
   if p == nil {
@@ -118,7 +122,45 @@ func (self User) RSAPubKey() string {
 
 // marks in redis that we desire to share with 
 // said person
-func (self User) AddConnection(person *Person) {
-  
+func (self *User) AddConnection(c redis.Conn, person *Person) {
+  // XXX: score could be alpha ranking
+  //      score could be timestamp of adding
+  revel.INFO.Println("Adding Connection", person.AccountIdentifier, "to", self.AccountIdentifier)
+  score := 1
+  _, err := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsKey()).Add(score).Add(person.AccountIdentifier)...)
+  if err != nil {
+    panic(err)
+  }
+}
+
+type ConnectionEntry struct {
+  AccountIdentifier string
+}
+
+type ConnectionList struct {
+  Connections []ConnectionEntry
+}
+
+func (self *User) ListConnections(c redis.Conn) ConnectionList {
+    list := ConnectionList{}
+    result, err := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsKey()).Add(0).Add(-1)...)
+    if err != nil {
+      panic(err)
+    }
+    identifiers, _ := redis.Strings(result, nil)
+    for _,element := range identifiers {
+            ce := ConnectionEntry{AccountIdentifier: element}
+            list.Connections = append(list.Connections, ce)
+    }
+    return list
+}
+
+func (self *User) HasConnection(c redis.Conn, q string) bool {
+    result, err := c.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsKey()).Add(q)...)
+    if err != nil {
+      panic(err)
+    }
+    b, _ := redis.Bool(result, nil)
+    return b
 }
 

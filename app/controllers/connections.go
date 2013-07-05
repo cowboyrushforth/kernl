@@ -20,7 +20,12 @@ func (c Connections) checkUser() revel.Result {
 }
 
 func (c Connections) Index() revel.Result {
-  return c.Render()
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+  user := c.current_user()
+  list := user.ListConnections(rc)
+  return c.Render(list)
 }
 
 func (c Connections) New() revel.Result {
@@ -28,6 +33,15 @@ func (c Connections) New() revel.Result {
 }
 
 func (c Connections) Verify(q string) revel.Result {
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+  // see if we have this connection already
+  if c.current_user().HasConnection(rc, q) {
+    c.Flash.Error("You are already connected to "+q)
+    return c.Redirect(Connections.Index)
+  }
+
   revel.INFO.Println("about to finger:", q)
 
   client := webfinger.NewClient(nil)

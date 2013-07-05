@@ -59,7 +59,7 @@ func (self *Person) Connect(c redis.Conn, user *User) (error) {
   }
   if result.StatusCode == 200 || result.StatusCode == 202 {
      if self.Insert(c) {
-        user.AddConnection(self)
+        user.AddConnection(c,self)
         return nil
      } else {
         panic("could not save")
@@ -70,15 +70,13 @@ func (self *Person) Connect(c redis.Conn, user *User) (error) {
   return nil
 }
 
-func (self Person) Insert(c redis.Conn) bool {
+func (self *Person) Insert(c redis.Conn) bool {
   pem_key, _ := base64.StdEncoding.DecodeString(self.RSAPubKey)
   self.RSAPubKey = string(pem_key)
   self.DisplayName = strings.Replace(self.DisplayName, "acct:", "", 1)
-  self.AccountIdentifier = strings.Replace(self.DisplayName, "acct:", "", 1)
+  self.AccountIdentifier = strings.Replace(self.AccountIdentifier, "acct:", "", 1)
 
-  // TODO
-  // wrap in redis multi
-  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(&self)...)
+  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
   if errb != nil {
     panic(errb)
   }
