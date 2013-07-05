@@ -1,0 +1,62 @@
+<div id="content">
+  <h1>{{.card.AccountIdentifier}}</h1>
+  <div id="content_inner">
+    <div class="entity_profile vcard author" id="i">
+      <h2>User profile</h2>
+      <dl class="entity_nickname">
+        <dt>Nickname</dt>
+        <dd>
+          <a class="nickname url uid" href="{{.host_prefix}}/u/{{.card.Slug}}" rel="me">{{.card.AccountIdentifier}}</a>
+        </dd>
+      </dl>
+      <dl class="entity_given_name">
+        <dt>First name</dt>
+        <dd>
+          <span class="given_name"></span>
+        </dd>
+      </dl>
+      <dl class="entity_family_name">
+        <dt>Family name</dt>
+        <dd>
+          <span class="family_name"></span>
+        </dd>
+      </dl>
+      <dl class="entity_fn">
+        <dt>Full name</dt>
+        <dd>
+          <span class="fn">{{.card.AccountIdentifier}}</span>
+        </dd>
+      </dl>
+      <dl class="entity_url">
+        <dt>URL</dt>
+        <dd>
+          <a class="url" href="{{.host_prefix}}" id="pod_location" rel="me">{{.host_prefix}}</a>
+        </dd>
+      </dl>
+      <dl class="entity_photo">
+        <dt>Photo</dt>
+        <dd>
+          <img class="photo avatar" height="300px" src="/assets/user/default.png" width="300px">
+        </dd>
+      </dl>
+      <dl class="entity_photo_medium">
+        <dt>Photo</dt>
+        <dd>
+          <img class="photo avatar" height="100px" src="/assets/user/default.png" width="100px">
+        </dd>
+      </dl>
+      <dl class="entity_photo_small">
+        <dt>Photo</dt>
+        <dd>
+          <img class="photo avatar" height="50px" src="/assets/user/default.png" width="50px">
+        </dd>
+      </dl>
+      <dl class="entity_searchable">
+        <dt>Searchable</dt>
+        <dd>
+          <span class="searchable">true</span>
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>

@@ -54,7 +54,7 @@ func (c Webfinger) Show(q string) revel.Result {
       if err == nil {
         hcard := Link{Rel: "http://microformats.org/profile/hcard",
                      Xtype: "text/html",
-                     Href: host_prefix+"/hc/"+user.Slug}
+                     Href: host_prefix+"/hcards/"+user.Slug}
 
         seed := Link{Rel: "http://joindiaspora.com/seed_location",
                      Xtype: "text/html",

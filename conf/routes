@@ -12,6 +12,7 @@ GET     /connections                            Connections.Index
 GET     /connections/new                        Connections.New
 GET     /connections/verify                     Connections.Verify
 POST    /connections                            Connections.Create
+GET     /hcards/:slug                           Hcards.Show
 GET     /login                                  Sessions.New
 GET     /join                                   Users.New
 POST    /join                                   Users.Create

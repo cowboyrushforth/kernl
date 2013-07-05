@@ -113,5 +113,5 @@ func (self User) RSAPubKey() string {
   // marshal public portion
   bytes, _ := x509.MarshalPKIXPublicKey(&key.PublicKey)
   // encode into pem format
-  return string(pem.EncodeToMemory(&pem.Block{Type: "RSA PUBLIC KEY", Bytes: bytes}))
+  return string(pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: bytes}))
 }
