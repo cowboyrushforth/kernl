@@ -95,15 +95,29 @@ func (c Connections) Verify(q string) revel.Result {
 }
 
 func (c Connections) Create(person models.Person) revel.Result {
-  // XXX: check validation
-  // send salmon message to remote party
 
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+
+  // validate user model
+  person.Validate(rc, c.Validation)
+
+  // shows errs if any
+  if c.Validation.HasErrors() {
+    c.Validation.Keep()
+    c.FlashParams()
+    return c.RenderText("did not pass validation")
+  }
+
+  // send salmon message to remote party
+  // and save Person if successful
   success := false
-  err := person.Connect(c.current_user()) 
+  err := person.Connect(rc, c.current_user()) 
   if err == nil {
     success = true
   }
 
   // if sharing message goes thru save connection
-  return c.Render(success)
+  return c.Render(success, person)
 }

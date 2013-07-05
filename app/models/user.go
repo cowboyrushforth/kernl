@@ -115,3 +115,10 @@ func (self User) RSAPubKey() string {
   // encode into pem format
   return string(pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: bytes}))
 }
+
+// marks in redis that we desire to share with 
+// said person
+func (self User) AddConnection(person *Person) {
+  
+}
+

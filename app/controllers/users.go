@@ -17,8 +17,6 @@ func (c Users) Create(Slug string,
                       Email string, 
                       Password string, 
                       PasswordConfirmation string) revel.Result {
-// to print to log
-//          revel.INFO.Println("hello")
 
       // get redis handle
       rc := GetRedisConn()

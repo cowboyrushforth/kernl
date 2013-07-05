@@ -10,7 +10,6 @@ import "encoding/base64"
 import "encoding/pem"
 import "net/http"
 import "net/url"
-import "fmt"
 
 // sends a 'start sharing' notification from
 // the owner of this person entry to the person 
@@ -39,7 +38,6 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
     RSAKey: user.RSAKey,
   }
   xml := salmon.EncodeToXml(true)
-  fmt.Println(xml)
   salmon_endpoint := person.PodUrl + "/receive/users/" + person.RemoteGuid
   return sendPreparedSalmon(xml, salmon_endpoint)
 }
