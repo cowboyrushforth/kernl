@@ -1,4 +1,9 @@
 package models
+
+// sender prepared all bits
+// needed for salmon transmission
+// and sends
+
 import "github.com/cowboyrushforth/gosalmon"
 import "strings"
 import "crypto/cipher"
