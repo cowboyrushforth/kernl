@@ -8,6 +8,7 @@ import "crypto/rand"
 import "crypto/rsa"
 import "crypto/x509"
 import "encoding/pem"
+import "regexp"
 
 type User struct {
   DisplayName  string
@@ -46,11 +47,14 @@ func (self *User) String() string {
 
 func (self *User) Validate(c redis.Conn, v *revel.Validation) {
 
+  var emailPattern = regexp.MustCompile("[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?")
+
   // check email sanity
   v.Check(self.Email, 
     revel.Required{},
     revel.MaxSize{100},
     revel.MinSize{5},
+    revel.Email{revel.Match{emailPattern}},
     EmailDoesNotExist{c},
   ).Key("user.Email")
 
