@@ -31,6 +31,10 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
 
   payload := strings.Replace(template, "$sender", user.AccountIdentifier, 1)
   payload = strings.Replace(payload, "$recipient", person.AccountIdentifier, 1)
+  return sendSalmon(payload, user, person)
+}
+
+func sendSalmon(payload string, user *User, person *Person) (resp *http.Response, err error) {
   encryption_header, inner_iv, inner_key := generateEncryptionHeader(user, person)
   encrypted_payload := generateEncryptedPayload(payload, inner_iv, inner_key)
 
