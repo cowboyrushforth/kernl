@@ -5,6 +5,7 @@ import "github.com/robfig/revel"
 import "encoding/base64"
 import "strings"
 import "fmt"
+import "errors"
 
 type Person struct {
   RemoteGuid   string
@@ -15,6 +16,23 @@ type Person struct {
   Email        string
   RSAPubKey    string
   AccountIdentifier string
+}
+
+func PersonFromUid(c redis.Conn, uid string) (*Person, error) {
+  person := Person{}
+  v, errb := redis.Values(c.Do("HGETALL", "person:"+uid))
+  if errb != nil {
+    return nil, errb
+  }
+  errc := redis.ScanStruct(v, &person)
+  if errc != nil {
+    return nil, errc
+  }
+  if len(person.AccountIdentifier) == 0 {
+    return nil, errors.New("person not found")
+  }
+
+  return &person, nil
 }
 
 func (self *Person) Id() string {

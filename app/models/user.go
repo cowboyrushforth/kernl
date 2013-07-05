@@ -9,6 +9,7 @@ import "crypto/rsa"
 import "crypto/x509"
 import "encoding/pem"
 import "regexp"
+import "strings"
 
 type User struct {
   DisplayName  string
@@ -39,6 +40,19 @@ func UserFromUid(c redis.Conn, uid string) (*User, error) {
 
 func UserFromSlug(c redis.Conn, slug string) (*User, error) {
     return UserFromUid(c, "user:"+slug)
+}
+
+func UserFromGuid(c redis.Conn, guid string) (*User, error) {
+    // lookup account identifier from guid
+    result, err := c.Do("GET", redis.Args{}.Add("guid:"+guid)...)
+    if err != nil {
+      panic(err)
+    }
+    slug, _ := redis.String(result, nil)
+    if slug == "" {
+      return nil, errors.New("user not found")
+    }
+    return UserFromSlug(c, strings.Replace(slug, "user:", "", 1))
 }
 
 func (self *User) String() string {
@@ -96,8 +110,12 @@ func (self *User) Insert(c redis.Conn) bool {
   if erra != nil {
     panic("data access problem")
   }
-  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+  _, errb := c.Do("SET", redis.Args{}.Add("guid:"+self.Guid).Add(self.Id())...)
   if errb != nil {
+    panic("data access problem")
+  }
+  _, errc := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+  if errc != nil {
     panic("data access problem")
   }
 
