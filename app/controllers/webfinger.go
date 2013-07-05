@@ -25,7 +25,7 @@ type XRD struct {
 func (c Webfinger) Index() revel.Result {
   host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
 
-  link := Link{Rel: "ldd", 
+  link := Link{Rel: "lrdd", 
                Template: host_prefix+"/wf?q={uri}",
                Xtype: "application/xrd+xml",
                Title: "Webfinger Template"}

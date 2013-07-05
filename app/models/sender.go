@@ -1,12 +1,10 @@
 package models
-import "fmt"
 import "github.com/cowboyrushforth/gosalmon"
 import "strings"
 import "crypto/cipher"
 import "crypto/aes"
 import "crypto/x509"
 import "crypto/rsa"
-//import "crypto/sha1"
 import "crypto/rand"
 import "encoding/base64"
 import "encoding/pem"
@@ -21,7 +19,7 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
   <post>
     <request>
       <sender_handle>$sender</sender_handle>
-      <recipient_handle>$receipient</sender_handle>
+      <recipient_handle>$recipient</sender_handle>
     </request>
   </post>
 </XML>`
@@ -33,7 +31,7 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
 
   salmon := gosalmon.Salmon{
     EncryptionHeader: encryption_header,
-    Payload: base64.URLEncoding.EncodeToString([]byte(encrypted_payload)),
+    Payload: encrypted_payload,
     Datatype: "application/atom+xml",
     Algorithm: "RSA-SHA256",
     Encoding: "base64url",
@@ -51,33 +49,33 @@ func sendPreparedSalmon(xml string, salmon_endpoint string) (resp *http.Response
   return http.PostForm(salmon_endpoint, v)
 }
 
-func generateEncryptedPayload(payload string, inner_iv []byte, inner_key []byte) string {
-  // sanity check
-  for (len(payload)%aes.BlockSize != 0) { 
-    payload = payload + "0"
+func generateEncryptedPayload(payload string, iv []byte, key []byte) string {
+  ciph, err := aes.NewCipher(key)
+  if err != nil {
+    panic(err)
   }
-  block, block_err := aes.NewCipher(inner_key)
-  if block_err != nil {
-    panic(block_err)
+  encryptor := cipher.NewCBCEncrypter(ciph, iv)
+  pad := encryptor.BlockSize() - len(payload)%encryptor.BlockSize()
+  enc_payload := make([]byte, len(payload), len(payload)+pad)
+  copy(enc_payload, payload)
+  for i := 0; i < pad; i++ {
+    enc_payload = append(enc_payload, byte(pad))
   }
-  enc_payload := make([]byte, aes.BlockSize+len(payload))
-  header_mode := cipher.NewCBCEncrypter(block, inner_iv)
-  header_mode.CryptBlocks(enc_payload, []byte(payload))
+  encryptor.CryptBlocks(enc_payload, enc_payload)
   return base64.StdEncoding.EncodeToString(enc_payload)
 }
 
 func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byte) {
   
-
   template := `<decrypted_header>
   <iv>$inner_iv</iv>
   <aes_key>$inner_key</aes_key>
+  <author_id>$author_id</author_id>
   <author>
     <name>$display_name</name>
     <uri>$identifier</uri>
   </author>
 </decrypted_header>`
-
 
   inner_key := []byte(RandomSHA256()[0:32])
   inner_iv  := []byte(RandomString(16))
@@ -88,27 +86,17 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
   dec_header = strings.Replace(dec_header, "$inner_key", base64.StdEncoding.EncodeToString(inner_key), 1)
   dec_header = strings.Replace(dec_header, "$display_name", user.DisplayName, 1)
   dec_header = strings.Replace(dec_header, "$identifier", user.AccountIdentifier, 1)
+  dec_header = strings.Replace(dec_header, "$author_id", user.AccountIdentifier, 1)
 
-
-  // sanity check
-  for (len(dec_header)%aes.BlockSize != 0) { 
-    dec_header = dec_header + "0"
-  }
-
-  // make block
-  header_block, header_err := aes.NewCipher(outer_key)
-  if header_err != nil {
-    panic(header_err)
-  }
   // encrypt header
-  enc_header := make([]byte, aes.BlockSize+len(dec_header))
-  header_mode := cipher.NewCBCEncrypter(header_block, outer_iv)
-  header_mode.CryptBlocks(enc_header, []byte(dec_header))
+  enc_header := generateEncryptedPayload(dec_header, outer_iv, outer_key)
+
   // make outer aes key bundle
   outer_bundle := `{
   "iv": "$outer_iv",
   "key": "$outer_key"
 }`
+
   // fill in template 
   outer_bundle = strings.Replace(outer_bundle, "$outer_iv", 
                                  base64.StdEncoding.EncodeToString(outer_iv), 1)
@@ -117,10 +105,6 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
 
   // encrypt outer bundle using recipients public key
   braw, _ := base64.StdEncoding.DecodeString(person.RSAPubKey)
-  fmt.Println("wheee")
-  fmt.Println(person.RSAPubKey)
-  fmt.Println(string(braw))
-  fmt.Println("wheee")
   p, _ := pem.Decode(braw)
   if p == nil {
     panic("could not parse public key")
@@ -129,27 +113,16 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
   if(pubkeyerr != nil) {
     panic("could not parse public key")
   }
-  //hash := sha1.New()
 
-  // NEED PKCS1_PADDING HERE
-   enc_outer_bundle, outer_bundle_err := rsa.EncryptPKCS1v15(rand.Reader, pubkey.(*rsa.PublicKey), []byte(outer_bundle))
-//  enc_outer_bundle, outer_bundle_err := rsa.EncryptOAEP(hash, rand.Reader, pubkey.(*rsa.PublicKey), []byte(outer_bundle), nil)
+  enc_outer_bundle, outer_bundle_err := rsa.EncryptPKCS1v15(rand.Reader, pubkey.(*rsa.PublicKey), []byte(outer_bundle))
   if outer_bundle_err != nil {
     panic(outer_bundle_err)
   }
 
-  encrypted_header_json_object := `{
-  "aes_key": "$aes_key",
-  "ciphertext": "$ciphertext" 
-}`
-
-  encrypted_header_json_object = strings.Replace(encrypted_header_json_object, "$aes_key",
-                                                 base64.StdEncoding.EncodeToString(enc_outer_bundle), 1)
-  encrypted_header_json_object = strings.Replace(encrypted_header_json_object, "$ciphertext",
-                                                 base64.StdEncoding.EncodeToString(enc_header), 1)
-
-
-  encrypted_header := "<encrypted_header>"+base64.StdEncoding.EncodeToString([]byte(encrypted_header_json_object))+"</encrypted_header>"
-
+  enc_json := `{"aes_key": "$aes_key", "ciphertext": "$ciphertext" }`
+  enc_json = strings.Replace(enc_json, "$aes_key",
+                             base64.StdEncoding.EncodeToString(enc_outer_bundle), 1)
+  enc_json = strings.Replace(enc_json, "$ciphertext", enc_header, 1)
+  encrypted_header := "<encrypted_header>"+base64.StdEncoding.EncodeToString([]byte(enc_json))+"</encrypted_header>"
   return encrypted_header, inner_iv, inner_key
 }
