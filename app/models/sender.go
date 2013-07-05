@@ -37,7 +37,7 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
     Encoding: "base64url",
     RSAKey: user.RSAKey,
   }
-  xml := salmon.EncodeToXml()
+  xml := salmon.EncodeToXml(true)
   salmon_endpoint := person.PodUrl + "/receive/users/" + person.RemoteGuid
   return sendPreparedSalmon(xml, salmon_endpoint)
 }
