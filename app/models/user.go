@@ -51,6 +51,7 @@ func (self *User) Validate(c redis.Conn, v *revel.Validation) {
     revel.Required{},
     revel.MaxSize{100},
     revel.MinSize{5},
+    EmailDoesNotExist{c},
   ).Key("user.Email")
 
   // check slug sanity
@@ -58,42 +59,13 @@ func (self *User) Validate(c redis.Conn, v *revel.Validation) {
     revel.Required{},
     revel.MaxSize{64},
     revel.MinSize{2},
+    SlugDoesNotExist{c},
   ).Key("user.Slug")
 
-  // if above validations check run the email uniqueness check
-  if(v.HasErrors() == false) {
-    v.Required(self.SlugDoesNotExist(c)).Key("user.Slug").Message("Slug Already Exists")
-  }
-  // if above validations check run the email uniqueness check
-  if(v.HasErrors() == false) {
-    v.Required(self.EmailDoesNotExist(c)).Key("user.Email").Message("Email Already Exists")
-  }
 }
 
 func (self *User) Id() string {
   return fmt.Sprintf("user:%s", self.Slug)
-}
-
-func (self *User) SlugDoesNotExist(c redis.Conn) bool {
-  exists, err := redis.Bool(c.Do("EXISTS", self.Id()))
-  if err != nil {
-    panic("data access problem")
-  }
-  if exists {
-    return false
-  }
-  return true
-}
-
-func (self *User) EmailDoesNotExist(c redis.Conn) bool {
-  exists, err := redis.Bool(c.Do("EXISTS", "email:"+self.Email))
-  if err != nil {
-    panic("data access problem")
-  }
-  if exists {
-    return false
-  }
-  return true
 }
 
 func (self User) Insert(c redis.Conn) bool {
