@@ -3,7 +3,6 @@ package controllers
 import "github.com/robfig/revel"
 import "code.google.com/p/go.crypto/bcrypt"
 import "kernl/app/models"
-import "fmt"
 
 type Sessions struct {
   Kernl
@@ -13,22 +12,19 @@ func (c Sessions) New() revel.Result {
   return c.Render()
 }
 
-func (c Sessions) Create(Email string, Password string) revel.Result {
+func (c Sessions) Create(slug string, password string) revel.Result {
   // TODO Validations
   rc := GetRedisConn()
   defer rc.Close()
-  uid := fmt.Sprintf("user:%s", Email) 
-  u, err := models.FetchUid(rc, uid)
+  u, err := models.UserFromSlug(rc, slug)
   if err == nil {
-    errb := bcrypt.CompareHashAndPassword(u.PwdHash, []byte(Password))
+    errb := bcrypt.CompareHashAndPassword(u.PwdHash, []byte(password))
     if errb == nil {
-      c.Session["uid"] = uid
+      c.Session["uid"] = "user:"+slug
       c.Flash.Success("Welcome, " + u.String())
       return c.Redirect(Home.Index)
     } 
   }
-
-  c.Flash.Out["username"] = Email
   c.Flash.Error("Login Failed")
   return c.Redirect(Sessions.New)
 }

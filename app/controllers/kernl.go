@@ -52,7 +52,7 @@ func (c Kernl) current_user() *(models.User) {
     // see if uid is valid
     rc := GetRedisConn()
     defer rc.Close()
-    u, err := models.FetchUid(rc, c.Session["uid"])
+    u, err := models.UserFromUid(rc, c.Session["uid"])
     if err != nil {
       revel.INFO.Println("\tauth BAD!", err)
       c.Session["uid"] = ""

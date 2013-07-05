@@ -7,16 +7,16 @@
 {{if .errors}}Please fix errors marked below!{{end}}
 
 <form method="POST" action="{{url "Sessions.Create"}}">
-  <p class="{{if index .errors "Email"}}error{{end}}">
-    <strong>Email:</strong> 
-    <input type="text" name="Email" value="{{index .flash "Email"}}" />
-    <span class="error">{{index .errors "Email"}}</span>
+  <p class="{{if index .errors "slug"}}error{{end}}">
+    <strong>Slug:</strong> 
+    <input type="text" name="slug" value="{{index .flash "slug"}}" />
+    <span class="error">{{index .errors "slug"}}</span>
   </p>
 
-  <p class="{{if .errors.Password}}error{{end}}">
+  <p class="{{if .errors.password}}error{{end}}">
     <strong>Password:</strong> 
-    <input type="password" name="Password" />
-    <span class="error">{{.errors.Password.Message}}</span>
+    <input type="password" name="password" />
+    <span class="error">{{.errors.password.Message}}</span>
   </p>
 
   <p class="buttons">

@@ -20,7 +20,7 @@ type User struct {
   AccountIdentifier string
 }
 
-func FetchUid(c redis.Conn, uid string) (*User, error) {
+func UserFromUid(c redis.Conn, uid string) (*User, error) {
   user := User{}
   v, errb := redis.Values(c.Do("HGETALL", uid))
   if errb != nil {
@@ -35,6 +35,10 @@ func FetchUid(c redis.Conn, uid string) (*User, error) {
   }
 
   return &user, nil
+}
+
+func UserFromSlug(c redis.Conn, slug string) (*User, error) {
+    return UserFromUid(c, "user:"+slug)
 }
 
 func (self *User) String() string {
@@ -94,4 +98,20 @@ func (self User) Insert(c redis.Conn) bool {
   }
 
   return true
+}
+
+// returns users public key in der
+// encoded format
+func (self User) RSAPubKey() string {
+  // decode private key
+  p, _ := pem.Decode([]byte(self.RSAKey))
+  if p == nil {
+    panic("could not parse private key")
+  }
+  // parse private key 
+  key, _ := x509.ParsePKCS1PrivateKey(p.Bytes)
+  // marshal public portion
+  bytes, _ := x509.MarshalPKIXPublicKey(&key.PublicKey)
+  // encode into pem format
+  return string(pem.EncodeToMemory(&pem.Block{Type: "RSA PUBLIC KEY", Bytes: bytes}))
 }
