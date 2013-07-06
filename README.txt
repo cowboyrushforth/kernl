@@ -32,6 +32,12 @@ go get github.com/cowboyrushforth/go-webfinger
 ./bin/revel run kernl
 http://localhost:9000/ should work
 
+
+Coffee:
+
+install node: http://nodejs.org/download/
+sudo npm install -g coffee-script
+
 -------------------- 
 Ref Sites:
 
@@ -40,4 +46,7 @@ http://robfig.github.io/revel/
 http://mercurial.selenic.com/
 https://code.google.com/p/go/downloads/list
 http://golang.org/
+
+http://nodejs.org/download/
+http://coffeescript.org/
 
