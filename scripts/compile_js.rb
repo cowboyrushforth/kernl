@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
 
-exec('coffee -o public/static/js -c public/static/coffee')
+exec('coffee -o public/static/compiled_js -c coffee')
