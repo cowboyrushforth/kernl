@@ -14,6 +14,8 @@ GET     /connections/verify                     Connections.Verify
 POST    /connections                            Connections.Create
 GET     /hcards/:slug                           Hcards.Show
 POST    /receive/users/:guid                    Salmon.Receive
+GET     /public/:slug/feed.atom                 Public.Index
+GET     /people/:guid                           People.Show
 GET     /login                                  Sessions.New
 GET     /join                                   Users.New
 POST    /join                                   Users.Create

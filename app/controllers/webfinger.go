@@ -70,7 +70,7 @@ func (c Webfinger) Show(q string) revel.Result {
 
         feed := Link{Rel: "http://schemas.google.com/g/2010#updates-from",
                      Xtype: "application/atom+xml",
-                     Href: host_prefix+"/public/"+user.Slug+".atom"}
+                     Href: host_prefix+"/public/"+user.Slug+"/feed.atom"}
 
         key  := Link{Rel: "diaspora-public-key",
                      Xtype: "RSA",
@@ -82,6 +82,8 @@ func (c Webfinger) Show(q string) revel.Result {
                    Link: []Link{hcard, seed, guid, page, feed, key}}
 
         return c.RenderXml(xrd)
+      } else {
+        revel.INFO.Println("could not find", slug)
       }
     }
   } 

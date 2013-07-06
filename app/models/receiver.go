@@ -88,7 +88,19 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (paylo
    // now that we have seen who its from
    // get our versio of that public key
    // and verify the salmon sig
-   person, _ := PersonFromUid(rc, header.AuthorId)
+   person, person_err := PersonFromUid(rc, header.AuthorId)
+   if person_err != nil {
+     // we appear to not have this person.
+     // try to finger them.
+     person_err = nil
+     person, person_err = PersonFromWebFinger(header.AuthorId)
+     if person_err != nil {
+       panic("can not locate user")
+     }
+     person.Insert(rc)
+   }
+   
+
    salmon.RSAPubKey = person.RSAPubKey
    if salmon.IsValid() {
      // ok decrypt the final payload

@@ -2,6 +2,8 @@ package models
 
 import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
+import "github.com/cowboyrushforth/go-webfinger"
+import "github.com/cowboyrushforth/go-webfinger/jrd"
 import "encoding/base64"
 import "strings"
 import "fmt"
@@ -100,4 +102,45 @@ func (self *Person) Insert(c redis.Conn) bool {
   }
 
   return true
+}
+
+func PersonFromWebFinger(q string) (*Person, error) {
+  revel.INFO.Println("about to finger:", q)
+
+  person := Person{}
+  client := webfinger.NewClient(nil)
+
+  insecure_fingering := revel.Config.BoolDefault("auth.allow_unsecure_fingering", false)
+
+  err := error(nil)
+  resource := &jrd.JRD{}
+  if insecure_fingering {
+    resource, err = client.LookupInsecure(q, []string{})
+  } else {
+    resource, err = client.Lookup(q, []string{})
+  }
+  if err != nil {
+    return nil, err
+  }
+
+  person.AccountIdentifier = resource.Subject
+  person.DisplayName = resource.Subject
+  profile_link := resource.GetLinkByRel("http://webfinger.net/rel/profile-page")
+  if profile_link != nil {
+    person.ProfileUrl = profile_link.Href
+  }
+  seed_link := resource.GetLinkByRel("http://joindiaspora.com/seed_location")
+  if seed_link != nil {
+    person.PodUrl = seed_link.Href
+  }
+  guid_link := resource.GetLinkByRel("http://joindiaspora.com/guid")
+  if guid_link != nil {
+    person.RemoteGuid = guid_link.Href
+  }
+  pubkey_link := resource.GetLinkByRel("diaspora-public-key")
+  if pubkey_link != nil {
+    person.RSAPubKey = pubkey_link.Href
+  }
+
+  return &person, nil
 }
