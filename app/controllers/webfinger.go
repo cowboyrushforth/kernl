@@ -45,6 +45,7 @@ func (c Webfinger) Show(q string) revel.Result {
   host_suffix := revel.Config.StringDefault("host.suffix", "localhost:9000")
 
   if strings.Contains(q, "@"+host_suffix) {
+    q = strings.Replace(q, "acct:", "", 1)
     slug := strings.Replace(q, "@"+host_suffix, "", 1)
     if len(slug) > 0 {
       // find user
