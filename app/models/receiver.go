@@ -35,7 +35,7 @@ type DecryptedHeader struct {
   AuthorId string `xml:"author_id"`
 }
 
-func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (payload string, err error) {
+func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sender *Person, payload string, err error) {
   salmon := gosalmon.Salmon{}
   errs := salmon.DecodeFromXml(xmlstr)
   if errs != nil {
@@ -116,7 +116,7 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (paylo
      }
      mode := cipher.NewCBCDecrypter(pblock, piv)
      mode.CryptBlocks(ppayload, ppayload)
-     return string(ppayload), nil
+     return person, string(ppayload), nil
    }
-   return "", errors.New("Salmon Not Verified")
+   return nil, "", errors.New("Salmon Not Verified")
 }

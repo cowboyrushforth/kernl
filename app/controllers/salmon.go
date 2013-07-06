@@ -25,7 +25,7 @@ func (c Salmon) Receive(guid string, xml string) revel.Result {
   // parse the xml, and verify it
   // against the senders pubkey
   // and the users privkey
-  verified_payload, err := models.ParseVerifiedSalmonPayload(rc, user, sane_xml)
+  sender, verified_payload, err := models.ParseVerifiedSalmonPayload(rc, user, sane_xml)
   if err != nil {
     c.Response.Status = 400
     return c.RenderText("")
@@ -33,7 +33,8 @@ func (c Salmon) Receive(guid string, xml string) revel.Result {
 
   revel.INFO.Println("verified payload:")
   revel.INFO.Println(verified_payload)
-  // TODO: process the payload, take needed actions
+
+  models.ParseAndProcessVerifiedPayload(user, sender, verified_payload)
 
   // TODO: return 202 if we had this item already
   c.Response.Status = 200
