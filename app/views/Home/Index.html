@@ -1,12 +1,28 @@
 {{set . "title" "kernl."}}
 {{template "header.html" .}}
 
-welcome
-
 <div class="container">
   <div class="row">
     <div class="span6">
       {{template "flash.html" .}}
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="span12">
+
+      <div id="news-feed">
+        <div class="news-item">
+          {{template "news-item.html" .}}
+        </div>
+        <div class="news-item">
+          {{template "news-item.html" .}}
+        </div>
+      </div>
+
+
     </div>
   </div>
 </div>

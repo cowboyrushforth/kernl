@@ -3,3 +3,4 @@ tmp/
 routes/
 *.swp
 *.swo
+public/static/compiled_js
