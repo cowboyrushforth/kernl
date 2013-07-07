@@ -3,7 +3,7 @@ package controllers
 import "github.com/robfig/revel"
 
 type News struct {
-  Kernl
+  KernlAuthed
 }
 
 func (c News) Like(q string) revel.Result {

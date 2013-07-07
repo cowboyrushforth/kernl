@@ -10,7 +10,6 @@ type Public struct {
 
 func (c Public) Index(slug string) revel.Result {
   // get redis handle
-  revel.INFO.Println("xxx", slug)
   rc := GetRedisConn()
   defer rc.Close()
   user, err := models.UserFromSlug(rc,slug)

@@ -24,16 +24,16 @@ type Kernl struct {
 }
 
 func GetRedisConn() redis.Conn {
-        rc := redisPool.Get()
-        for i := 0; i < 5; i++ {
-                if err := rc.Err(); err != nil {
-                        time.Sleep(10 * time.Millisecond)
-                        rc = redisPool.Get()
-                } else {
-                        break
-                }
-        }
-        return rc
+  rc := redisPool.Get()
+  for i := 0; i < 5; i++ {
+    if err := rc.Err(); err != nil {
+      time.Sleep(10 * time.Millisecond)
+      rc = redisPool.Get()
+    } else {
+      break
+    }
+  }
+  return rc
 }
 
 func (c Kernl) Index() revel.Result {
@@ -61,6 +61,15 @@ func (c Kernl) current_user() *(models.User) {
       c.RenderArgs["user"] = u
       return u 
     }
+  }
+  return nil
+}
+
+func (c Kernl) checkUser() revel.Result {
+  revel.INFO.Println("checking user")
+  if user := c.current_user(); user == nil {
+    c.Flash.Error("Please log in first")
+    return c.Redirect(Kernl.Index)
   }
   return nil
 }

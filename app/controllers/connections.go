@@ -8,9 +8,11 @@ import "net/http"
 import "io/ioutil"
 
 type Connections struct {
-  Kernl
+  KernlAuthed
 }
 
+
+/*
 func (c Connections) checkUser() revel.Result {
   if user := c.current_user(); user == nil {
     c.Flash.Error("Please log in first")
@@ -18,6 +20,7 @@ func (c Connections) checkUser() revel.Result {
   }
   return nil
 }
+*/
 
 func (c Connections) Index() revel.Result {
   // get redis handle

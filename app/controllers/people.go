@@ -4,7 +4,7 @@ import "github.com/robfig/revel"
 import "kernl/app/models"
 
 type People struct {
-  Kernl
+  KernlAuthed
 }
 
 func (c People) Show(slug string) revel.Result {
@@ -23,10 +23,9 @@ func (c People) ShowRemote(guid string) revel.Result {
   // get redis handle
   rc := GetRedisConn()
   defer rc.Close()
-  _, err := models.PersonFromGuid(rc,guid)
+  person, err := models.PersonFromGuid(rc,guid)
   if err != nil {
-    return c.NotFound("user not found")
+    return c.NotFound("person not found")
   }
-  x := []string{}
-  return c.RenderJson(x)
+  return c.Render(person)
 }

@@ -4,15 +4,7 @@ import "github.com/robfig/revel"
 import "kernl/app/models"
 
 type Home struct {
-  Kernl
-}
-
-func (c Home) checkUser() revel.Result {
-  if user := c.current_user(); user == nil {
-    c.Flash.Error("Please log in first")
-    return c.Redirect(Kernl.Index)
-  }
-  return nil
+  KernlAuthed
 }
 
 func (c Home) Index() revel.Result {
