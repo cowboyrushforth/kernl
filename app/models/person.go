@@ -104,6 +104,23 @@ func (self *Person) Insert(c redis.Conn) bool {
   return true
 }
 
+func (self *Person) ThumbnailUrl() string {
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
+  if len(self.ImageSrc) > 0 {
+    return self.ImageSrc
+  } else {
+    return host_prefix + "/static/images/default_profile_32.jpg"
+  }
+}
+
+func (self *Person) IsLocal() bool {
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
+  if self.PodUrl == host_prefix {
+    return true
+  }
+  return false
+}
+
 func PersonFromWebFinger(q string) (*Person, error) {
   revel.INFO.Println("about to finger:", q)
 

@@ -153,6 +153,7 @@ func (self *User) AddConnection(c redis.Conn, person *Person) {
 
 type ConnectionEntry struct {
   AccountIdentifier string
+  Person *Person
 }
 
 type ConnectionList struct {
@@ -167,8 +168,12 @@ func (self *User) ListConnections(c redis.Conn) ConnectionList {
     }
     identifiers, _ := redis.Strings(result, nil)
     for _,element := range identifiers {
-            ce := ConnectionEntry{AccountIdentifier: element}
-            list.Connections = append(list.Connections, ce)
+      person, err := PersonFromUid(c, element)
+      if err == nil {
+        ce := ConnectionEntry{AccountIdentifier: element,
+        Person: person}
+        list.Connections = append(list.Connections, ce)
+      }
     }
     return list
 }

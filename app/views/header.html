@@ -4,11 +4,8 @@
   <head>
     <title>{{.title}}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/static/css/custom.css">
-    <!--
-    <link rel="shortcut icon" type="image/png" href="/public/images/favicon.png">
-    -->
     <script src="/static/js/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="/static/compiled_js/events.js" type="text/javascript" charset="utf-8"></script>
   </head>
@@ -23,7 +20,7 @@
           <li><a href="/connections">connections</a></li>
         </ul>
         <ul class="nav pull-right">
-          <li><a>{{.user.Email}}</a></li>
+          <li><a>{{.user.AccountIdentifier}}</a></li>
           <li><a href="/settings">settings</a></li>
           <li><a href="/logout">logout</a></li>
         </ul>

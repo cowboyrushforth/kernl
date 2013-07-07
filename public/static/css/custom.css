@@ -1,3 +1,27 @@
+/* Bootstrap Overrides */
+.navbar-inner {
+  font-family: 'American Typewriter';
+}
+
+h5 {
+  font-family: 'American Typewriter';
+  font-size: 1.3em;
+  font-weight: 400;
+}
+/* * /
+
+/* Intro/Unauthed area */
+
+div.kernl-intro {
+  border-radius: 0px;
+  -webkit-box-shadow: 0 0 10px 5px #aaa;
+  -moz-box-shadow: 0 0 10px 5px #aaa;
+  box-shadow: 0 0 10px 5px #aaa;
+}
+
+/* */
+
+/* News Feed */
 #news-feed {
   margin: 10px 0 0 0;
 }
@@ -40,3 +64,11 @@
   height: 30px;
   border: 1px solid #CECECE;
 }
+
+/* */
+
+/* Connections Area */
+table.connections-table td {
+  line-height: 32px;
+}
+/* */

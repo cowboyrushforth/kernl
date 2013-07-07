@@ -6,22 +6,46 @@
       <form method="get" action="/connections/verify">
         <div class="input-append">
           <input class="span4" name="q" type="text" placeholder="Search For User">
-          <button class="btn" type="button">Go!</button>
+          <button class="btn" type="submit">Go!</button>
         </div>
       </form>
     </div>
   </div>
   <div class="row">
-    <div class="span12">
-      <table class="table table-bordered">
+    <div class="span9">
+      <table class="table table-bordered connections-table">
         {{range .list.Connections}}
         <tr>
           <td>
-            {{.AccountIdentifier}}
+            <img src="{{.Person.ThumbnailUrl}}" />
+          </td>
+          <td>
+            {{.Person.DisplayName}}
+          </td>
+          <td>
+            {{if .Person.IsLocal}}
+             <span class="label">Local</span>
+            {{else}}
+             <span class="label label-inverse">Remote</span>
+            {{end}}
+            <span class="label label-info">Sending</span>        
+            <span class="label label-success">Receiving</span>
+            <span class="label label-warning">Public</span>
+<!--
+            <span class="label label-important">Disconnected</span>
+-->
           </td>
         </tr>
         {{end}}
       </table>
+    </div>
+    <div class="span3">
+      <ul class="nav nav-pills nav-stacked">
+        <li class="active"><a href="/connections" title="All">All</a></li>
+        <li><a href="/connections/inbound" title="Inbound">Inbound</a></li>
+        <li><a href="/connections/outbound" title="Outbound">Outbound</a></li>
+        <li><a href="/connections/blocked" title="Blocked">Blocked</a></li>
+      </ul>
     </div>
   </div>
 </div>

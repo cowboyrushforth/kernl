@@ -572,10 +572,10 @@ a.muted:hover {
   color: #808080;
 }
 .text-warning {
-  color: #c09853;
+  color: #8c8579;
 }
 a.text-warning:hover {
-  color: #a47e3c;
+  color: #716b61;
 }
 .text-error {
   color: #b94a48;
@@ -1192,19 +1192,19 @@ input[type="checkbox"][readonly] {
 .control-group.warning .control-label,
 .control-group.warning .help-block,
 .control-group.warning .help-inline {
-  color: #c09853;
+  color: #8c8579;
 }
 .control-group.warning .checkbox,
 .control-group.warning .radio,
 .control-group.warning input,
 .control-group.warning select,
 .control-group.warning textarea {
-  color: #c09853;
+  color: #8c8579;
 }
 .control-group.warning input,
 .control-group.warning select,
 .control-group.warning textarea {
-  border-color: #c09853;
+  border-color: #8c8579;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
@@ -1212,16 +1212,16 @@ input[type="checkbox"][readonly] {
 .control-group.warning input:focus,
 .control-group.warning select:focus,
 .control-group.warning textarea:focus {
-  border-color: #a47e3c;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #dbc59e;
-  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #dbc59e;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #dbc59e;
+  border-color: #716b61;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #bbb7b0;
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #bbb7b0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #bbb7b0;
 }
 .control-group.warning .input-prepend .add-on,
 .control-group.warning .input-append .add-on {
-  color: #c09853;
-  background-color: #fcf8e3;
-  border-color: #c09853;
+  color: #8c8579;
+  background-color: #fafafc;
+  border-color: #8c8579;
 }
 .control-group.error .control-label,
 .control-group.error .help-block,
@@ -1872,7 +1872,7 @@ table th[class*="span"],
   background-color: #f2dede;
 }
 .table tbody tr.warning td {
-  background-color: #fcf8e3;
+  background-color: #fafafc;
 }
 .table tbody tr.info td {
   background-color: #d9edf7;
@@ -1884,7 +1884,7 @@ table th[class*="span"],
   background-color: #ebcccc;
 }
 .table-hover tbody tr.warning:hover td {
-  background-color: #faf2cc;
+  background-color: #eaeaf2;
 }
 .table-hover tbody tr.info:hover td {
   background-color: #c4e3f3;
@@ -2381,9 +2381,9 @@ table th[class*="span"],
   border: 1px solid text(0, 0, 0, 0.2);
   *border-right-width: 2px;
   *border-bottom-width: 2px;
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
@@ -3211,15 +3211,15 @@ input[type="submit"].btn.btn-mini {
   padding: 8px 35px 8px 14px;
   margin-bottom: 18px;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-  background-color: #fcf8e3;
-  border: 1px solid #fbeed5;
+  background-color: #fafafc;
+  border: 1px solid #cccccc;
   -webkit-border-radius: 0px;
   -moz-border-radius: 0px;
   border-radius: 0px;
 }
 .alert,
 .alert h4 {
-  color: #c09853;
+  color: #8c8579;
 }
 .alert h4 {
   margin: 0;
@@ -3389,9 +3389,9 @@ input[type="submit"].btn.btn-mini {
   padding-bottom: 8px;
   margin-top: 2px;
   margin-bottom: 2px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
 }
 .nav-pills > .active > a,
 .nav-pills > .active > a:hover {
@@ -3621,7 +3621,6 @@ input[type="submit"].btn.btn-mini {
   -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
   *zoom: 1;
-  font-family: 'American Typewriter';
 }
 .navbar-inner:before,
 .navbar-inner:after {
@@ -5112,11 +5111,3 @@ a.badge:hover {
 .affix {
   position: fixed;
 }
-/* Begin Kernl */
-div.kernl-intro {
-  border-radius: 0px;
-  -webkit-box-shadow: 0 0 10px 5px #aaa;
-  -moz-box-shadow: 0 0 10px 5px #aaa;
-  box-shadow: 0 0 10px 5px #aaa;
-}
-/* End Kernl */
