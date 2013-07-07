@@ -265,7 +265,34 @@ func (self *User) HasConnection(c redis.Conn, q string) bool {
     if err != nil {
       panic(err)
     }
-    b, _ := redis.Bool(result, nil)
-    return b
+    b, _ := redis.Int(result, nil)
+    if b > 0 {
+      return true
+    }
+    return false
+}
+
+func (self *User) SharesWithUser(c redis.Conn, account_identifier string) bool {
+    result, err := c.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(account_identifier)...)
+    if err != nil {
+      panic(err)
+    }
+    b, _ := redis.Int(result, nil)
+    if b > 0 {
+      return true
+    } 
+    return false
+}
+
+func (self *User) IsSharedWithByUser(c redis.Conn, account_identifier string) bool {
+    result, err := c.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsInboundKey()).Add(account_identifier)...)
+    if err != nil {
+      panic(err)
+    }
+    b, _ := redis.Int(result, nil)
+    if b > 0 {
+      return true
+    } 
+    return false
 }
 

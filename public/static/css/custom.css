@@ -1,12 +1,17 @@
 /* Bootstrap Overrides */
 .navbar-inner {
-  font-family: 'American Typewriter';
+  font-family: 'American Typewriter', serif;
 }
 
-h5 {
-  font-family: 'American Typewriter';
-  font-size: 1.3em;
+h5,h3 {
+  font-family: 'American Typewriter', serif;
   font-weight: 400;
+}
+h3 {
+  font-size: 1.9em;
+}
+h5 {
+  font-size: 1.3em;
 }
 /* * /
 
@@ -19,7 +24,6 @@ div.kernl-intro {
   box-shadow: 0 0 10px 5px #aaa;
 }
 
-/* */
 
 /* News Feed */
 #news-feed {
@@ -84,4 +88,24 @@ div.kernl-intro {
 table.connections-table td {
   line-height: 32px;
 }
+/* */
+
+/* People Areas */
+ 
+span.handle {
+  font-family: 'helvetica', 'arial';
+  line-height: 30px;
+  font-weight: 200;
+}
+
+span.handle span {
+  font-weight: 600;
+  font-size: 1.2em;
+}
+
+h3.name {
+  line-height: 15px;
+}
+
+
 /* */

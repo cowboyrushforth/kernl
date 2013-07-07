@@ -21,7 +21,7 @@
         </ul>
         <ul class="nav pull-right">
           {{ if .user.NotificationCount}}
-          <li><a><span class="badge badge-warning">{{.user.NotificationCount}}</span></a></li>
+          <li><a href="/"><span class="badge badge-warning">{{.user.NotificationCount}}</span></a></li>
           {{ end }}
           <li><a>{{.user.AccountIdentifier}}</a></li>
           <li><a href="/settings">settings</a></li>
