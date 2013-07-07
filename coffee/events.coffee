@@ -11,6 +11,18 @@ record_like = (news_id, done) ->
 $ ->
   $('.news-like').click (e) ->
     e.preventDefault()
+    summary = $(e.target).parent().parent().find('.likes-summary')
     record_like 123, (result) ->
-      console.log result
+      summary.show()
 
+$ ->
+  $('.news-comment').click (e) ->
+    e.preventDefault()
+
+$ ->
+  $('.news-share').click (e) ->
+    e.preventDefault()
+
+$ ->
+  $('.comment-like').click (e) ->
+    e.preventDefault()
