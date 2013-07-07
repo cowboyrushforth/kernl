@@ -23,5 +23,17 @@
 }
 
 .news-name { font-weight: bold; }
-.news-content { margin: 1px 0 0 0; width: 450px;}
-.news-actions a { font-size: 12px; color: #841B2D;}
+.news-content { margin: 1px 0 0 0; width: 450px; }
+.news-actions a { font-size: 12px; color: #841B2D; }
+.news-time { color: #CECECE; font-size: 11px; }
+
+.comments-container { overflow: hidden; margin: 0 0 10px 0; }
+.comment { overflow: hidden; margin: 10px 0 0 0; }
+.comment-left { float: left; }
+.comment-right { float: left; margin: 0 0 0 10px; width: 350px;}
+
+.comment-photo {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #CECECE;
+}
