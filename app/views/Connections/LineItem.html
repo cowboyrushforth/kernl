@@ -3,7 +3,7 @@
     <img src="{{.Person.ThumbnailUrl}}" />
   </td>
   <td>
-    {{.Person.DisplayName}}
+    <a href="{{.Person.LocalUrl}}">{{.Person.DisplayName}}</a>
   </td>
   <td>
     {{if .Person.IsLocal}}

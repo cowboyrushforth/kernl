@@ -20,7 +20,8 @@ POST    /news/like                              News.Like
 GET     /hcards/:slug                           Hcards.Show
 POST    /receive/users/:guid                    Salmon.Receive
 GET     /public/:slug/feed.atom                 Public.Index
-GET     /people/:guid                           People.Show
+GET     /r/:guid                                People.ShowRemote
+GET     /u/:slug                                People.Show
 GET     /notifications/:id/ack                  Notifications.Ack
 GET     /login                                  Sessions.New
 GET     /join                                   Users.New

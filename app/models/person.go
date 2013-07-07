@@ -37,6 +37,19 @@ func PersonFromUid(c redis.Conn, uid string) (*Person, error) {
   return &person, nil
 }
 
+func PersonFromGuid(c redis.Conn, guid string) (*Person, error) {
+    // lookup account identifier from guid
+    result, err := c.Do("GET", redis.Args{}.Add("guid:"+guid)...)
+    if err != nil {
+      panic(err)
+    }
+    uid, _ := redis.String(result, nil)
+    if uid == "" {
+      return nil, errors.New("person not found")
+    }
+    return PersonFromUid(c, uid)
+}
+
 func (self *Person) Id() string {
    return fmt.Sprintf("person:%s", self.AccountIdentifier)
 }
@@ -135,6 +148,16 @@ func (self *Person) IsLocal() bool {
     return true
   }
   return false
+}
+
+// returns a local profile page for the user
+// even if they are remote
+func (self *Person) LocalUrl() string {
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
+  if self.IsLocal() {
+    return self.ProfileUrl
+  } 
+  return host_prefix + "/r/"+ self.RemoteGuid
 }
 
 func PersonFromWebFinger(q string) (*Person, error) {
