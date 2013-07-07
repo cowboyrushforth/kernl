@@ -23,4 +23,5 @@
 }
 
 .news-name { font-weight: bold; }
-.news-content { margin: 1px 0 0 0; }
+.news-content { margin: 1px 0 0 0; width: 450px;}
+.news-actions a { font-size: 12px; color: #841B2D;}
