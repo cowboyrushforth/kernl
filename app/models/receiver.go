@@ -95,7 +95,7 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sende
      person_err = nil
      person, person_err = PersonFromWebFinger(header.AuthorId)
      if person_err != nil {
-       panic("can not locate user")
+       panic("can not locate person")
      }
      person.Insert(rc)
    }
@@ -117,6 +117,36 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sende
      mode := cipher.NewCBCDecrypter(pblock, piv)
      mode.CryptBlocks(ppayload, ppayload)
      return person, string(ppayload), nil
+   }
+   return nil, "", errors.New("Salmon Not Verified")
+}
+
+func ParsePublicVerifiedSalmonPayload(rc redis.Conn, xmlstr string) (sender *Person, payload string, err error) {
+  salmon := gosalmon.Salmon{}
+  errs := salmon.DecodeFromXml(xmlstr)
+  if errs != nil {
+    panic("Salmon Decoding Problem")
+  }
+  revel.INFO.Println("from", salmon.AuthorId)
+
+   // now that we have seen who its from
+   // get our versio of that public key
+   // and verify the salmon sig
+   person, person_err := PersonFromUid(rc, "person:"+salmon.AuthorId)
+   if person_err != nil {
+     // we appear to not have this person.
+     // try to finger them.
+     person_err = nil
+     person, person_err = PersonFromWebFinger(salmon.AuthorId)
+     if person_err != nil {
+       panic("can not locate person")
+     }
+     person.Insert(rc)
+   }
+   
+   salmon.RSAPubKey = person.RSAPubKey
+   if salmon.IsValid() {
+     return person, salmon.Payload, nil
    }
    return nil, "", errors.New("Salmon Not Verified")
 }

@@ -38,6 +38,10 @@ func ParseAndProcessVerifiedPayload(c redis.Conn, user *User, sender *Person, pa
     return HandleInboundRequest(c, user, sender, v)
   case "profile":
     return HandleInboundProfile(c, user, sender, v)
+  case "status_message":
+    return HandleInboundStatusMessage(c, sender, v)
+  case "participation":
+    return HandleInboundParticipation(c, sender, v)
   }
   return errors.New("flavor not understood")
 }
@@ -65,5 +69,15 @@ func HandleInboundProfile(c redis.Conn, user *User, sender *Person, xpkg XPackag
     }
     person.Insert(c)
   }
+  return nil
+}
+
+func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) error {
+  revel.INFO.Println("HandleInboundStatusMessage")
+  return nil
+}
+
+func HandleInboundParticipation(c redis.Conn, sender *Person, xpkg XPackage) error {
+  revel.INFO.Println("HandleInboundParticipation") 
   return nil
 }
