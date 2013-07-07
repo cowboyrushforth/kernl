@@ -26,3 +26,5 @@ $ ->
 $ ->
   $('.comment-like').click (e) ->
     e.preventDefault()
+    num_likes = $(e.target).parent().find('.num-likes')
+    num_likes.show()
