@@ -34,7 +34,12 @@ func (c Salmon) Receive(guid string, xml string) revel.Result {
   revel.INFO.Println("verified payload:")
   revel.INFO.Println(verified_payload)
 
-  models.ParseAndProcessVerifiedPayload(user, sender, verified_payload)
+  perr := models.ParseAndProcessVerifiedPayload(rc, user, sender, verified_payload)
+  if perr != nil {
+    revel.INFO.Println("could not process payload")
+    c.Response.Status = 400
+    return c.RenderText("")
+  }
 
   // TODO: return 202 if we had this item already
   c.Response.Status = 200

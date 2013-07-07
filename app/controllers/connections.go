@@ -24,7 +24,43 @@ func (c Connections) Index() revel.Result {
   rc := GetRedisConn()
   defer rc.Close()
   user := c.current_user()
-  list := user.ListConnections(rc)
+  list := user.ListConnections(rc, true, true)
+  return c.Render(list)
+}
+
+func (c Connections) Inbound() revel.Result {
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+  user := c.current_user()
+  list := user.ListConnections(rc, true, false)
+  return c.Render(list)
+}
+
+func (c Connections) Outbound() revel.Result {
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+  user := c.current_user()
+  list := user.ListConnections(rc, false, true)
+  return c.Render(list)
+}
+
+func (c Connections) Blocked() revel.Result {
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+  user := c.current_user()
+  list := user.ListBlockedConnections(rc)
+  return c.Render(list)
+}
+
+func (c Connections) Mutual() revel.Result {
+  // get redis handle
+  rc := GetRedisConn()
+  defer rc.Close()
+  user := c.current_user()
+  list := user.ListMutualConnections(rc)
   return c.Render(list)
 }
 

@@ -1,0 +1,15 @@
+<tr>
+  <td>
+    <img src="{{.Person.ThumbnailUrl}}" />
+  </td>
+  <td>
+    {{.Person.DisplayName}}
+  </td>
+  <td>
+    {{if .Person.IsLocal}}
+    <span class="label">Local</span>
+    {{else}}
+    <span class="label label-inverse">Remote</span>
+    {{end}}
+  </td>
+</tr>

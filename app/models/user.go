@@ -94,6 +94,22 @@ func (self *User) ConnectionsKey() string {
   return fmt.Sprintf("connections:%s", self.Id())
 }
 
+func (self *User) ConnectionsInboundKey() string {
+  return fmt.Sprintf("connections:inbound:%s", self.Id())
+}
+
+func (self *User) ConnectionsOutboundKey() string {
+  return fmt.Sprintf("connections:outbound:%s", self.Id())
+}
+
+func (self *User) ConnectionsBlockedKey() string {
+  return fmt.Sprintf("connections:blocked:%s", self.Id())
+}
+
+func (self *User) ConnectionsMutualKey() string {
+  return fmt.Sprintf("connections:mutual:%s", self.Id())
+}
+
 func (self *User) Insert(c redis.Conn) bool {
   // TODO
   // add email regex
@@ -140,14 +156,24 @@ func (self *User) RSAPubKey() string {
 
 // marks in redis that we desire to share with 
 // said person
-func (self *User) AddConnection(c redis.Conn, person *Person) {
+func (self *User) AddConnection(c redis.Conn, person *Person, inbound bool, outbound bool) {
   // XXX: score could be alpha ranking
   //      score could be timestamp of adding
-  revel.INFO.Println("Adding Connection", person.AccountIdentifier, "to", self.AccountIdentifier)
-  score := 1
-  _, err := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsKey()).Add(score).Add(person.AccountIdentifier)...)
-  if err != nil {
-    panic(err)
+  score := WordScore(person.DisplayName) 
+  revel.INFO.Println("Adding Connection", person.AccountIdentifier, "to", self.AccountIdentifier,
+                     "inbound", inbound, "outbound", outbound, "score", score)
+  if inbound {
+    _, err := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsInboundKey()).Add(score).Add(person.AccountIdentifier)...)
+    if err != nil {
+      panic(err)
+    }
+    // ok give us a notification that this person has started sharing with us
+  }
+  if outbound {
+    _, errb := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(score).Add(person.AccountIdentifier)...)
+    if errb != nil {
+      panic(errb)
+    }
   }
 }
 
@@ -160,13 +186,64 @@ type ConnectionList struct {
   Connections []ConnectionEntry
 }
 
-func (self *User) ListConnections(c redis.Conn) ConnectionList {
-    list := ConnectionList{}
-    result, err := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsKey()).Add(0).Add(-1)...)
-    if err != nil {
-      panic(err)
+func (self *User) AggregateConnections(c redis.Conn) {
+  // TODO: optimize to not do this over frequently
+  _, erra := c.Do("ZUNIONSTORE", redis.Args{}.Add(self.ConnectionsKey()).Add("2").
+  Add(self.ConnectionsInboundKey()).Add(self.ConnectionsOutboundKey()).Add("AGGREGATE").Add("MIN")...)
+  if erra != nil {
+    panic(erra)
+  }
+}
+
+func (self *User) IntersectConnections(c redis.Conn) {
+  // TODO: optimize to not do this over frequently
+  _, erra := c.Do("ZINTERSTORE", redis.Args{}.Add(self.ConnectionsMutualKey()).Add("2").
+  Add(self.ConnectionsInboundKey()).Add(self.ConnectionsOutboundKey()).Add("AGGREGATE").Add("MIN")...)
+  if erra != nil {
+    panic(erra)
+  }
+}
+
+func (self *User) ListConnections(c redis.Conn, inbound bool, outbound bool) ConnectionList {
+    key := ""
+    if inbound == true && outbound == true {
+      self.AggregateConnections(c)
+      key = self.ConnectionsKey()
+    } else if inbound == true {
+      key = self.ConnectionsInboundKey()
+    } else if outbound == true {
+      key = self.ConnectionsOutboundKey()
+    }
+
+    result, errb := c.Do("ZRANGE", redis.Args{}.Add(key).Add(0).Add(-1)...)
+    if errb != nil {
+      panic(errb)
     }
     identifiers, _ := redis.Strings(result, nil)
+    return self.materializeConnectionList(c, identifiers)
+}
+
+func (self *User) ListBlockedConnections(c redis.Conn) ConnectionList {
+    result, errb := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsBlockedKey).Add(0).Add(-1)...)
+    if errb != nil {
+      panic(errb)
+    }
+    identifiers, _ := redis.Strings(result, nil)
+    return self.materializeConnectionList(c, identifiers)
+}
+
+func (self *User) ListMutualConnections(c redis.Conn) ConnectionList {
+    self.IntersectConnections(c)
+    result, errb := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsMutualKey).Add(0).Add(-1)...)
+    if errb != nil {
+      panic(errb)
+    }
+    identifiers, _ := redis.Strings(result, nil)
+    return self.materializeConnectionList(c, identifiers)
+}
+
+func (self *User) materializeConnectionList(c redis.Conn, identifiers []string) ConnectionList { 
+    list := ConnectionList{}
     for _,element := range identifiers {
       person, err := PersonFromUid(c, element)
       if err == nil {
@@ -179,6 +256,7 @@ func (self *User) ListConnections(c redis.Conn) ConnectionList {
 }
 
 func (self *User) HasConnection(c redis.Conn, q string) bool {
+    self.AggregateConnections(c)
     result, err := c.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsKey()).Add(q)...)
     if err != nil {
       panic(err)

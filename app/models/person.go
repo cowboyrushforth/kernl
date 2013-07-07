@@ -70,8 +70,8 @@ func (self *Person) Validate(c redis.Conn, v *revel.Validation) {
 }
 
 // Connect initiates and synchronously
-// performs a sharing notification and
-// datastore write
+// performs a sharing notification (outbound connection)
+// and datastore write
 func (self *Person) Connect(c redis.Conn, user *User) (error) {
   result, err := SendSharingNotification(user, self)
   if err != nil {
@@ -79,7 +79,7 @@ func (self *Person) Connect(c redis.Conn, user *User) (error) {
   }
   if result.StatusCode == 200 || result.StatusCode == 202 {
      if self.Insert(c) {
-        user.AddConnection(c,self)
+        user.AddConnection(c,self, false, true)
         return nil
      } else {
         panic("could not save")
