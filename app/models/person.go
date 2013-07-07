@@ -121,16 +121,39 @@ func (self *Person) Insert(c redis.Conn) bool {
       panic("data access problem")
     }
   }
-  if identifier == "" || identifier == self.Id() {
+
+  // if its a new user,
+  // or if it matches a person
+  if (identifier == "") || 
+      (identifier == self.Id()) {
+
     _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
     if errb != nil {
       panic(errb)
     }
+    return true
+
   } else {
-   return false
+    // this guid is already one of our users
+    // so lets update/create their person row
+    if(identifier[:5] == "user:") {
+      revel.INFO.Println("ident", identifier)
+      user, errc := UserFromUid(c,identifier)
+      if errc != nil {
+        panic(errc)
+      }
+      if user.AccountIdentifier == self.AccountIdentifier {
+        revel.INFO.Println(user.AccountIdentifier, self.AccountIdentifier)
+        _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+        if errb != nil {
+          panic(errb)
+        }
+        return true
+      }
+    }
   }
 
-  return true
+  return false
 }
 
 func (self *Person) ThumbnailUrl() string {
