@@ -18,6 +18,7 @@ type User struct {
   PwdHash     []byte
   RSAKey      string
   Guid        string
+  NotificationCount int
   AccountIdentifier string
 }
 
@@ -110,6 +111,10 @@ func (self *User) ConnectionsMutualKey() string {
   return fmt.Sprintf("connections:mutual:%s", self.Id())
 }
 
+func (self *User) NotificationsKey() string {
+  return fmt.Sprintf("notifications:%s", self.Id())
+}
+
 func (self *User) Insert(c redis.Conn) bool {
   // TODO
   // add email regex
@@ -167,7 +172,6 @@ func (self *User) AddConnection(c redis.Conn, person *Person, inbound bool, outb
     if err != nil {
       panic(err)
     }
-    // ok give us a notification that this person has started sharing with us
   }
   if outbound {
     _, errb := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(score).Add(person.AccountIdentifier)...)
@@ -224,7 +228,7 @@ func (self *User) ListConnections(c redis.Conn, inbound bool, outbound bool) Con
 }
 
 func (self *User) ListBlockedConnections(c redis.Conn) ConnectionList {
-    result, errb := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsBlockedKey).Add(0).Add(-1)...)
+    result, errb := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsBlockedKey()).Add(0).Add(-1)...)
     if errb != nil {
       panic(errb)
     }
@@ -234,7 +238,7 @@ func (self *User) ListBlockedConnections(c redis.Conn) ConnectionList {
 
 func (self *User) ListMutualConnections(c redis.Conn) ConnectionList {
     self.IntersectConnections(c)
-    result, errb := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsMutualKey).Add(0).Add(-1)...)
+    result, errb := c.Do("ZRANGE", redis.Args{}.Add(self.ConnectionsMutualKey()).Add(0).Add(-1)...)
     if errb != nil {
       panic(errb)
     }
@@ -245,7 +249,7 @@ func (self *User) ListMutualConnections(c redis.Conn) ConnectionList {
 func (self *User) materializeConnectionList(c redis.Conn, identifiers []string) ConnectionList { 
     list := ConnectionList{}
     for _,element := range identifiers {
-      person, err := PersonFromUid(c, element)
+      person, err := PersonFromUid(c, "person:"+element)
       if err == nil {
         ce := ConnectionEntry{AccountIdentifier: element,
         Person: person}

@@ -7,8 +7,17 @@ import "errors"
 
 type XFlavor struct {
   XMLName xml.Name
+  /* request */
   SenderHandle string `xml:"sender_handle"`
   RecipientHandle string `xml:"recipient_handle"`
+
+  /* profile */
+  DiasporaHandle string `xml:"diaspora_handle"`
+  Searchable string `xml:"searchable"`
+  ImageUrl string `xml:"image_url"`
+  Nsfw bool `xml:"nsfw"`
+  TagString string `xml:"tag_string"`
+
 }
 type XPost struct {
   Flavor XFlavor `xml:",any"`
@@ -27,6 +36,8 @@ func ParseAndProcessVerifiedPayload(c redis.Conn, user *User, sender *Person, pa
   switch flavor {
   case "request":
     return HandleInboundRequest(c, user, sender, v)
+  case "profile":
+    return HandleInboundProfile(c, user, sender, v)
   }
   return errors.New("flavor not understood")
 }
@@ -36,5 +47,23 @@ func ParseAndProcessVerifiedPayload(c redis.Conn, user *User, sender *Person, pa
 func HandleInboundRequest(c redis.Conn, user *User, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundRequest, adding sender", xpkg.Post.Flavor.SenderHandle, "to", xpkg.Post.Flavor.RecipientHandle)
   user.AddConnection(c, sender, true, false)
-  return errors.New("asdf")
+  SendNotification(user, c, "share_started", sender.RemoteGuid)
+  return nil
+}
+
+// handle a profile stanza, unclear
+// how important this is at the moment
+func HandleInboundProfile(c redis.Conn, user *User, sender *Person, xpkg XPackage) error {
+  revel.INFO.Println("HandleInboundProfile, diaspora profile", xpkg.Post.Flavor.DiasporaHandle)
+  _, person_err := PersonFromUid(c, "person:"+xpkg.Post.Flavor.DiasporaHandle)
+  if person_err != nil {
+    // we appear to not have this person.
+    // try to finger them.
+    person, person_err := PersonFromWebFinger(xpkg.Post.Flavor.DiasporaHandle)
+    if person_err != nil {
+      panic("can not locate user")
+    }
+    person.Insert(c)
+  }
+  return nil
 }

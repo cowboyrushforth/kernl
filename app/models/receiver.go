@@ -88,7 +88,7 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sende
    // now that we have seen who its from
    // get our versio of that public key
    // and verify the salmon sig
-   person, person_err := PersonFromUid(rc, header.AuthorId)
+   person, person_err := PersonFromUid(rc, "person:"+header.AuthorId)
    if person_err != nil {
      // we appear to not have this person.
      // try to finger them.

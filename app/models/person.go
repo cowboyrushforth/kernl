@@ -22,7 +22,7 @@ type Person struct {
 
 func PersonFromUid(c redis.Conn, uid string) (*Person, error) {
   person := Person{}
-  v, errb := redis.Values(c.Do("HGETALL", "person:"+uid))
+  v, errb := redis.Values(c.Do("HGETALL", uid))
   if errb != nil {
     return nil, errb
   }
@@ -96,9 +96,25 @@ func (self *Person) Insert(c redis.Conn) bool {
   self.DisplayName = strings.Replace(self.DisplayName, "acct:", "", 1)
   self.AccountIdentifier = strings.Replace(self.AccountIdentifier, "acct:", "", 1)
 
-  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
-  if errb != nil {
-    panic(errb)
+  // sanity check so we only insert or upsert ourselves
+  result, err := c.Do("GET", redis.Args{}.Add("guid:"+self.RemoteGuid)...)
+  if err != nil {
+    panic(err)
+  }
+  identifier, _ := redis.String(result, nil)
+  if identifier == "" {
+    _, erra := c.Do("SET", redis.Args{}.Add("guid:"+self.RemoteGuid).Add(self.Id())...)
+    if erra != nil {
+      panic("data access problem")
+    }
+  }
+  if identifier == "" || identifier == self.Id() {
+    _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+    if errb != nil {
+      panic(errb)
+    }
+  } else {
+   return false
   }
 
   return true

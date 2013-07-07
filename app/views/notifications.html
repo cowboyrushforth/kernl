@@ -1,6 +1,10 @@
 <h5>notifications</h5>
+{{range .notifications}}
 <div class="alert alert-block">
-       <a title="zyz" class="close" href="">×</a>
-       <h4 class="alert-heading">Alert block</h4>
-       <p>Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</p>
+       <a class="close" href="/notifications/{{urlquery .Id}}/ack">×</a>
+       <h4 class="alert-heading">{{.Title}}</h4>
+       <p><a href="{{.Link}}">{{.Message}}</a></p>
 </div>
+{{else}}
+<i>none</i>
+{{end}}
