@@ -1,11 +1,15 @@
 {{set . "title" "kernl - connections"}}
 {{template "header.html" .}}
-
 <div class="container">
   <div class="row">
-    <form method="get" action="/connections/verify">
-      Verify and Add User: <input name="q" type="text" /> <input type="submit" value="Go" />
-    </form>
+    <div class="span12">
+      <form method="get" action="/connections/verify">
+        <div class="input-append">
+          <input class="span4" name="q" type="text" placeholder="Search For User">
+          <button class="btn" type="button">Go!</button>
+        </div>
+      </form>
+    </div>
   </div>
   <div class="row">
     <div class="span12">
