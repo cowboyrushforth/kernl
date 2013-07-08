@@ -1,6 +1,5 @@
 package models
 
-import "fmt"
 import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
 import "errors"
@@ -88,31 +87,35 @@ func (self *User) Validate(c redis.Conn, v *revel.Validation) {
 }
 
 func (self *User) Id() string {
-  return fmt.Sprintf("user:%s", self.Slug)
+  return "user:" + self.Slug
 }
 
 func (self *User) ConnectionsKey() string {
-  return fmt.Sprintf("connections:%s", self.Id())
+  return "connections:" + self.AccountIdentifier
 }
 
 func (self *User) ConnectionsInboundKey() string {
-  return fmt.Sprintf("connections:inbound:%s", self.Id())
+  return "connections:inbound:" + self.AccountIdentifier
 }
 
 func (self *User) ConnectionsOutboundKey() string {
-  return fmt.Sprintf("connections:outbound:%s", self.Id())
+  return "connections:outbound:" + self.AccountIdentifier
 }
 
 func (self *User) ConnectionsBlockedKey() string {
-  return fmt.Sprintf("connections:blocked:%s", self.Id())
+  return "connections:blocked:" + self.AccountIdentifier
 }
 
 func (self *User) ConnectionsMutualKey() string {
-  return fmt.Sprintf("connections:mutual:%s", self.Id())
+  return "connections:mutual:" + self.AccountIdentifier
 }
 
 func (self *User) NotificationsKey() string {
-  return fmt.Sprintf("notifications:%s", self.Id())
+  return "notifications:" + self.Id()
+}
+
+func (self *User) PostsKey() string {
+    return "posts:"+self.AccountIdentifier
 }
 
 func (self *User) Insert(c redis.Conn) bool {
@@ -164,19 +167,28 @@ func (self *User) RSAPubKey() string {
 func (self *User) AddConnection(c redis.Conn, person *Person, inbound bool, outbound bool) {
   // XXX: score could be alpha ranking
   //      score could be timestamp of adding
+  // XXX: wrap in multi
   score := WordScore(person.DisplayName) 
   revel.INFO.Println("Adding Connection", person.AccountIdentifier, "to", self.AccountIdentifier,
                      "inbound", inbound, "outbound", outbound, "score", score)
   if inbound {
-    _, err := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsInboundKey()).Add(score).Add(person.AccountIdentifier)...)
-    if err != nil {
-      panic(err)
+    _, erra := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsInboundKey()).Add(score).Add(person.AccountIdentifier)...)
+    if erra != nil {
+      panic(erra)
+    }
+    _, errb := c.Do("ZADD", redis.Args{}.Add(person.ConnectionsOutboundKey()).Add(score).Add(self.AccountIdentifier)...)
+    if errb != nil {
+      panic(errb)
     }
   }
   if outbound {
-    _, errb := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(score).Add(person.AccountIdentifier)...)
-    if errb != nil {
-      panic(errb)
+    _, errc := c.Do("ZADD", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(score).Add(person.AccountIdentifier)...)
+    if errc != nil {
+      panic(errc)
+    }
+    _, errd := c.Do("ZADD", redis.Args{}.Add(person.ConnectionsInboundKey()).Add(score).Add(self.AccountIdentifier)...)
+    if errd != nil {
+      panic(errd)
     }
   }
 }

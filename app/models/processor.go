@@ -4,6 +4,7 @@ import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
 import "encoding/xml"
 import "errors"
+import "time"
 
 type XFlavor struct {
   XMLName xml.Name
@@ -18,10 +19,17 @@ type XFlavor struct {
   Nsfw bool `xml:"nsfw"`
   TagString string `xml:"tag_string"`
 
+  /* post */
+  RawMessage string `xml:"raw_message"`
+  Guid string `xml:"guid"`
+  Public bool `xml:"public"`
+  CreatedAt string `xml:"created_at"`
 }
+
 type XPost struct {
   Flavor XFlavor `xml:",any"`
 }
+
 type XPackage struct {
   Post XPost `xml:"post"`
 }
@@ -74,6 +82,15 @@ func HandleInboundProfile(c redis.Conn, user *User, sender *Person, xpkg XPackag
 
 func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundStatusMessage")
+  ts,_ := time.Parse("2006-01-02 15:04:05 MST", xpkg.Post.Flavor.CreatedAt)
+  p := Post{
+    Message: xpkg.Post.Flavor.RawMessage,
+    Guid: xpkg.Post.Flavor.Guid,
+    AccountIdentifier: xpkg.Post.Flavor.DiasporaHandle,
+    Public: xpkg.Post.Flavor.Public,
+    CreatedAt: ts.Unix(),
+  }
+  p.Insert(c, sender)
   return nil
 }
 

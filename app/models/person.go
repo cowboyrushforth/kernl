@@ -6,7 +6,6 @@ import "github.com/cowboyrushforth/go-webfinger"
 import "github.com/cowboyrushforth/go-webfinger/jrd"
 import "encoding/base64"
 import "strings"
-import "fmt"
 import "errors"
 
 type Person struct {
@@ -51,7 +50,31 @@ func PersonFromGuid(c redis.Conn, guid string) (*Person, error) {
 }
 
 func (self *Person) Id() string {
-   return fmt.Sprintf("person:%s", self.AccountIdentifier)
+   return "person:" + self.AccountIdentifier
+}
+
+func (self *Person) PostsKey() string {
+  return "posts:"+self.AccountIdentifier
+}
+
+func (self *Person) ConnectionsKey() string {
+  return "connections:" + self.AccountIdentifier
+}
+
+func (self *Person) ConnectionsInboundKey() string {
+  return "connections:inbound:" + self.AccountIdentifier
+}
+
+func (self *Person) ConnectionsOutboundKey() string {
+  return "connections:outbound:" + self.AccountIdentifier
+}
+
+func (self *Person) ConnectionsBlockedKey() string {
+  return "connections:blocked:" + self.AccountIdentifier
+}
+
+func (self *Person) ConnectionsMutualKey() string {
+  return "connections:mutual:" + self.AccountIdentifier
 }
 
 func (self *Person) Validate(c redis.Conn, v *revel.Validation) {
