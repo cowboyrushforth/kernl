@@ -17,6 +17,7 @@ GET     /connections/new                        Connections.New
 GET     /connections/verify                     Connections.Verify
 POST    /connections                            Connections.Create
 POST    /news/like                              News.Like
+POST    /posts                                  Posts.Create
 GET     /hcards/:slug                           Hcards.Show
 POST    /receive/users/:guid                    Salmon.Receive
 POST    /receive/public                         Salmon.ReceivePublic

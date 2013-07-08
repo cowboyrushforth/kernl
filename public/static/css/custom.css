@@ -24,6 +24,20 @@ div.kernl-intro {
   box-shadow: 0 0 10px 5px #aaa;
 }
 
+/* ghetto post */
+div#ghetto-post {
+  width: 480px;
+}
+
+div#ghetto-post textarea {
+  width: 470px;
+  height: 50px;
+  line-height: 10px;
+}
+div#ghetto-post.closed textarea {
+  height: 12px;
+}
+
 
 /* News Feed */
 #news-feed {

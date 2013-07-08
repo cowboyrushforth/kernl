@@ -12,13 +12,20 @@
 <div class="container">
   <div class="row">
     <div class="span9">
+      <div class="row">
+        {{template "ghetto-post.html" .}}
+      </div>
 
-      <div id="news-feed">
-        {{range .feed}}
-        <div class="news-item">
-          {{template "news-item.html" .}}
+      <div class="row">
+        <div class="span9">
+          <div id="news-feed">
+            {{range .feed}}
+            <div class="news-item">
+              {{template "news-item.html" .}}
+            </div>
+            {{end}}
+          </div>
         </div>
-        {{end}}
       </div>
 
 
