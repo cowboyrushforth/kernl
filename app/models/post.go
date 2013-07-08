@@ -35,6 +35,10 @@ func (self *Post) Id() string {
   return "post:"+self.Guid
 }
 
+func (self *Post) CommentsKey() string {
+  return "comments:"+self.Guid
+}
+
 func PostFromId(c redis.Conn, id string) (*Post, error) {
   post := Post{}
   v, errb := redis.Values(c.Do("HGETALL", id))

@@ -13,7 +13,6 @@ type XFlavor struct {
   RecipientHandle string `xml:"recipient_handle"`
 
   /* profile */
-  DiasporaHandle string `xml:"diaspora_handle"`
   Searchable string `xml:"searchable"`
   ImageUrl string `xml:"image_url"`
   Nsfw bool `xml:"nsfw"`
@@ -21,9 +20,17 @@ type XFlavor struct {
 
   /* post */
   RawMessage string `xml:"raw_message"`
-  Guid string `xml:"guid"`
   Public bool `xml:"public"`
   CreatedAt string `xml:"created_at"`
+
+  /* shared */
+  Guid string `xml:"guid"`
+  DiasporaHandle string `xml:"diaspora_handle"`
+  
+  /* comment */
+  ParentGuid string `xml:"parent_guid"`
+  AuthorSignature string `xml:"author_signature"`
+  Text string `xml:"text"`
 }
 
 type XPost struct {
@@ -50,6 +57,8 @@ func ParseAndProcessVerifiedPayload(c redis.Conn, user *User, sender *Person, pa
     return HandleInboundStatusMessage(c, sender, v)
   case "participation":
     return HandleInboundParticipation(c, sender, v)
+  case "comment":
+    return HandleInboundComment(c, user, sender, v)
   }
   return errors.New("flavor not understood")
 }
@@ -83,7 +92,7 @@ func HandleInboundProfile(c redis.Conn, user *User, sender *Person, xpkg XPackag
 func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundStatusMessage")
   ts,_ := time.Parse("2006-01-02 15:04:05 MST", xpkg.Post.Flavor.CreatedAt)
-  p := Post{
+  post := Post{
     DisplayName: sender.DisplayName,
     Message: xpkg.Post.Flavor.RawMessage,
     Guid: xpkg.Post.Flavor.Guid,
@@ -91,11 +100,25 @@ func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) err
     Public: xpkg.Post.Flavor.Public,
     CreatedAt: ts.Unix(),
   }
-  p.Insert(c, sender)
+  post.Insert(c, sender)
   return nil
 }
 
 func HandleInboundParticipation(c redis.Conn, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundParticipation") 
+  return nil
+}
+
+func HandleInboundComment(c redis.Conn, user *User, sender *Person, xpkg XPackage) error {
+  revel.INFO.Println("HandleInboundComment") 
+  comment := Comment{
+        DisplayName: sender.DisplayName,
+        Text: xpkg.Post.Flavor.Text,
+        Guid: xpkg.Post.Flavor.Guid,
+        ParentGuid: xpkg.Post.Flavor.ParentGuid,
+        AccountIdentifier: xpkg.Post.Flavor.DiasporaHandle,
+        CreatedAt: time.Now().Unix(),
+  }
+  comment.Insert(c, sender)
   return nil
 }
