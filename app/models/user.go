@@ -308,3 +308,20 @@ func (self *User) IsSharedWithByUser(c redis.Conn, account_identifier string) bo
     return false
 }
 
+// find or create a Person for this user
+func (self *User) Person(rc redis.Conn) (*Person) {
+  person, err := PersonFromGuid(rc, self.Guid)
+  if err != nil {
+     // we appear to not have this person.
+     // try to finger them.
+     err = nil
+     person, err = PersonFromWebFinger(self.AccountIdentifier)
+     if err != nil {
+       panic("can not locate person")
+     }
+     person.Insert(rc)
+   }
+
+   return person
+}
+

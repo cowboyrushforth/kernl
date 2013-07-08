@@ -94,6 +94,7 @@ func (self *Post) DistributeToReceivers(c redis.Conn, sender *Person) {
     panic(errb)
   }
   identifiers, _ := redis.Strings(results, nil)
+  identifiers = append(identifiers, sender.AccountIdentifier)
   for _,identifier := range identifiers {
     _, errd := c.Do("ZADD", redis.Args{}.Add("feed:"+identifier).
     Add(time.Now().Unix()).Add(self.Id())...)
