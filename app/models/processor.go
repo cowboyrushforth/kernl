@@ -84,6 +84,7 @@ func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) err
   revel.INFO.Println("HandleInboundStatusMessage")
   ts,_ := time.Parse("2006-01-02 15:04:05 MST", xpkg.Post.Flavor.CreatedAt)
   p := Post{
+    DisplayName: sender.DisplayName,
     Message: xpkg.Post.Flavor.RawMessage,
     Guid: xpkg.Post.Flavor.Guid,
     AccountIdentifier: xpkg.Post.Flavor.DiasporaHandle,

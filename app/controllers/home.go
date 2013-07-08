@@ -12,6 +12,7 @@ func (c Home) Index() revel.Result {
   rc := GetRedisConn()
   defer rc.Close()
   notifications := models.ListCurrentNotifications(rc, c.current_user())
-  return c.Render(notifications)
+  feed := models.HomeFeedForUser(rc, c.current_user())
+  return c.Render(notifications, feed)
 }
 

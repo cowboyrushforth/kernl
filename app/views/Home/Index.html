@@ -14,12 +14,11 @@
     <div class="span9">
 
       <div id="news-feed">
+        {{range .feed}}
         <div class="news-item">
           {{template "news-item.html" .}}
         </div>
-        <div class="news-item">
-          {{template "news-item.html" .}}
-        </div>
+        {{end}}
       </div>
 
 

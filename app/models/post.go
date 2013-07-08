@@ -17,12 +17,15 @@ type Photo struct {
 }
 
 type Post struct {
+  DisplayName string
   Message string
   Guid string
   AccountIdentifier string
   Public bool
-  Photo Photo
   CreatedAt int64
+  Likes int
+  Dislikes int
+  Photo Photo `redis:"-"`
 }
 
 func (self *Post) Id() string {
@@ -42,7 +45,6 @@ func PostFromId(c redis.Conn, id string) (*Post, error) {
   if len(post.AccountIdentifier) == 0 {
     return nil, errors.New("post not found")
   }
-
   return &post, nil
 }
 
