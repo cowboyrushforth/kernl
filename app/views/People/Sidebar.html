@@ -1,0 +1,27 @@
+<div class="row">
+  <h3 class="name">{{.target.DisplayName}}</h3>
+  <span class="handle"><span>[</span>&nbsp;{{.target.AccountIdentifier}}&nbsp;<span>]</span></span>
+</div>
+{{ if not .is_self }}
+<div class="row">
+  {{if .connected_outbound}}
+  <a class="btn btn-inverse btn-mini" href="#"><i class="icon-remove icon-white"></i> Disconnect</a>
+  {{else}}
+  <a class="btn btn-inverse btn-mini" href="/connections/verify?q={{.target.AccountIdentifier}}"><i class="icon-plus-sign icon-white"></i> Connect</a>
+  {{end}}
+  <a class="btn btn-inverse btn-mini" href="#"><i class="icon-envelope icon-white"></i> Message</a>
+</div>
+<div class="row">
+  <div style="padding-top: 5px;">
+  {{if .connected_inbound }}
+  <span class="label label-info">Shares With Me</span>
+    {{if .connected_outbound}}
+    <span class="label label-success">Mutual Connection</span>
+    {{end}}
+  {{else}}
+  <span class="label">Public Only</span>
+  {{end}}
+</div>
+</div>
+{{end}}
+

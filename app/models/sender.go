@@ -145,7 +145,6 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
                                  base64.StdEncoding.EncodeToString(outer_key), 1)
 
   // encrypt outer bundle using recipients public key
-//  braw, _ := base64.StdEncoding.DecodeString(person.RSAPubKey)
   p, _ := pem.Decode([]byte(person.RSAPubKey))
   if p == nil {
     panic("could not parse public key")

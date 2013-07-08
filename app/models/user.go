@@ -284,6 +284,18 @@ func (self *User) HasConnection(c redis.Conn, q string) bool {
     return false
 }
 
+func (self *User) HasOutboundConnection(c redis.Conn, q string) bool {
+    result, err := c.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(q)...)
+    if err != nil {
+      panic(err)
+    }
+    b, _ := redis.Int(result, nil)
+    if b > 0 {
+      return true
+    }
+    return false
+}
+
 func (self *User) SharesWithUser(c redis.Conn, account_identifier string) bool {
     result, err := c.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(account_identifier)...)
     if err != nil {

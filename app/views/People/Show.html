@@ -15,18 +15,7 @@
     </div>
     <div class="span3">
       <div class="container">
-        <div class="row">
-          <h3 class="name">{{.target_user.DisplayName}}</h3>
-          <span class="handle"><span>[</span>&nbsp;{{.target_user.AccountIdentifier}}&nbsp;<span>]</span></span>
-        </div>
-        <div class="row">
-          {{if .connected_outbound}}
-            <a class="btn btn-inverse btn-mini" href="#"><i class="icon-remove icon-white"></i> Disconnect</a>
-          {{else}}
-            <a class="btn btn-inverse btn-mini" href="#"><i class="icon-plus-sign icon-white"></i> Connect</a>
-          {{end}}
-          <a class="btn btn-inverse btn-mini" href="#"><i class="icon-envelope icon-white"></i> Message</a>
-        </div>
+        {{template "People/Sidebar.html" .}}
       </div>
     </div>
   </div>

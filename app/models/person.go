@@ -109,6 +109,8 @@ func (self *Person) Validate(c redis.Conn, v *revel.Validation) {
 // performs a sharing notification (outbound connection)
 // and datastore write
 func (self *Person) Connect(c redis.Conn, user *User) (error) {
+  pem_key, _ := base64.StdEncoding.DecodeString(self.RSAPubKey)
+  self.RSAPubKey = string(pem_key)
   result, err := SendSharingNotification(user, self)
   if err != nil {
       panic(err)
@@ -127,10 +129,13 @@ func (self *Person) Connect(c redis.Conn, user *User) (error) {
 }
 
 func (self *Person) Insert(c redis.Conn) bool {
-  pem_key, _ := base64.StdEncoding.DecodeString(self.RSAPubKey)
-  self.RSAPubKey = string(pem_key)
   self.DisplayName = strings.Replace(self.DisplayName, "acct:", "", 1)
   self.AccountIdentifier = strings.Replace(self.AccountIdentifier, "acct:", "", 1)
+  // if we have not unpacked this yet do so now
+  if strings.Contains(self.RSAPubKey, "BEGIN PUBLIC KEY") == false {
+    pem_key, _ := base64.StdEncoding.DecodeString(self.RSAPubKey)
+    self.RSAPubKey = string(pem_key)
+  }
 
   // sanity check so we only insert or upsert ourselves
   result, err := c.Do("GET", redis.Args{}.Add("guid:"+self.RemoteGuid)...)

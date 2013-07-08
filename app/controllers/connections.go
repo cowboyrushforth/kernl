@@ -65,7 +65,7 @@ func (c Connections) Verify(q string) revel.Result {
   rc := GetRedisConn()
   defer rc.Close()
   // see if we have this connection already
-  if c.current_user().HasConnection(rc, q) {
+  if c.current_user().HasOutboundConnection(rc, q) {
     c.Flash.Error("You are already connected to "+q)
     return c.Redirect(Connections.Index)
   }
