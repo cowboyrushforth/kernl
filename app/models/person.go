@@ -1,5 +1,6 @@
 package models
 
+import "kernl/app/lib/redishandle"
 import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
 import "github.com/cowboyrushforth/go-webfinger"
@@ -19,9 +20,9 @@ type Person struct {
   AccountIdentifier string
 }
 
-func PersonFromUid(c redis.Conn, uid string) (*Person, error) {
+func PersonFromUid(uid string) (*Person, error) {
   person := Person{}
-  v, errb := redis.Values(c.Do("HGETALL", uid))
+  v, errb := redis.Values(redishandle.Do("HGETALL", uid))
   if errb != nil {
     return nil, errb
   }
@@ -36,9 +37,9 @@ func PersonFromUid(c redis.Conn, uid string) (*Person, error) {
   return &person, nil
 }
 
-func PersonFromGuid(c redis.Conn, guid string) (*Person, error) {
+func PersonFromGuid(guid string) (*Person, error) {
     // lookup account identifier from guid
-    result, err := c.Do("GET", redis.Args{}.Add("guid:"+guid)...)
+    result, err := redishandle.Do("GET", redis.Args{}.Add("guid:"+guid)...)
     if err != nil {
       panic(err)
     }
@@ -46,7 +47,7 @@ func PersonFromGuid(c redis.Conn, guid string) (*Person, error) {
     if uid == "" {
       return nil, errors.New("person not found")
     }
-    return PersonFromUid(c, uid)
+    return PersonFromUid(uid)
 }
 
 func (self *Person) Id() string {
@@ -77,7 +78,7 @@ func (self *Person) ConnectionsMutualKey() string {
   return "connections:mutual:" + self.AccountIdentifier
 }
 
-func (self *Person) Validate(c redis.Conn, v *revel.Validation) {
+func (self *Person) Validate(v *revel.Validation) {
 
   v.Check(self.RemoteGuid, 
     revel.Required{},
@@ -108,7 +109,7 @@ func (self *Person) Validate(c redis.Conn, v *revel.Validation) {
 // Connect initiates and synchronously
 // performs a sharing notification (outbound connection)
 // and datastore write
-func (self *Person) Connect(c redis.Conn, user *User) (error) {
+func (self *Person) Connect(user *User) (error) {
   pem_key, _ := base64.StdEncoding.DecodeString(self.RSAPubKey)
   self.RSAPubKey = string(pem_key)
   result, err := SendSharingNotification(user, self)
@@ -116,8 +117,8 @@ func (self *Person) Connect(c redis.Conn, user *User) (error) {
       panic(err)
   }
   if result.StatusCode == 200 || result.StatusCode == 202 {
-     if self.Insert(c) {
-        user.AddConnection(c,self, false, true)
+     if self.Insert() {
+        user.AddConnection(self, false, true)
         return nil
      } else {
         panic("could not save")
@@ -128,7 +129,7 @@ func (self *Person) Connect(c redis.Conn, user *User) (error) {
   return nil
 }
 
-func (self *Person) Insert(c redis.Conn) bool {
+func (self *Person) Insert() bool {
   self.DisplayName = strings.Replace(self.DisplayName, "acct:", "", 1)
   self.AccountIdentifier = strings.Replace(self.AccountIdentifier, "acct:", "", 1)
   // if we have not unpacked this yet do so now
@@ -138,13 +139,13 @@ func (self *Person) Insert(c redis.Conn) bool {
   }
 
   // sanity check so we only insert or upsert ourselves
-  result, err := c.Do("GET", redis.Args{}.Add("guid:"+self.RemoteGuid)...)
+  result, err := redishandle.Do("GET", redis.Args{}.Add("guid:"+self.RemoteGuid)...)
   if err != nil {
     panic(err)
   }
   identifier, _ := redis.String(result, nil)
   if identifier == "" {
-    _, erra := c.Do("SET", redis.Args{}.Add("guid:"+self.RemoteGuid).Add(self.Id())...)
+    _, erra := redishandle.Do("SET", redis.Args{}.Add("guid:"+self.RemoteGuid).Add(self.Id())...)
     if erra != nil {
       panic("data access problem")
     }
@@ -155,7 +156,7 @@ func (self *Person) Insert(c redis.Conn) bool {
   if (identifier == "") || 
       (identifier == self.Id()) {
 
-    _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+    _, errb := redishandle.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
     if errb != nil {
       panic(errb)
     }
@@ -166,13 +167,13 @@ func (self *Person) Insert(c redis.Conn) bool {
     // so lets update/create their person row
     if(identifier[:5] == "user:") {
       revel.INFO.Println("ident", identifier)
-      user, errc := UserFromUid(c,identifier)
+      user, errc := UserFromUid(identifier)
       if errc != nil {
         panic(errc)
       }
       if user.AccountIdentifier == self.AccountIdentifier {
         revel.INFO.Println(user.AccountIdentifier, self.AccountIdentifier)
-        _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+        _, errb := redishandle.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
         if errb != nil {
           panic(errb)
         }

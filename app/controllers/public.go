@@ -9,10 +9,7 @@ type Public struct {
 }
 
 func (c Public) Index(slug string) revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-  user, err := models.UserFromSlug(rc,slug)
+  user, err := models.UserFromSlug(slug)
   if err != nil {
     return c.NotFound("user not found")
   }

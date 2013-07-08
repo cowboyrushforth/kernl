@@ -1,5 +1,6 @@
 package models
 
+import "kernl/app/lib/redishandle"
 import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
 import "time"
@@ -14,9 +15,9 @@ type Notification struct {
   Read bool
 }
 
-func NotificationFromId(c redis.Conn, id string) (*Notification, error) {
+func NotificationFromId(id string) (*Notification, error) {
   notification := Notification{}
-  v, errb := redis.Values(c.Do("HGETALL", id))
+  v, errb := redis.Values(redishandle.Do("HGETALL", id))
   if errb != nil {
     return nil, errb
   }
@@ -31,9 +32,9 @@ func NotificationFromId(c redis.Conn, id string) (*Notification, error) {
   return &notification, nil
 }
 
-func SendNotification(user *User, c redis.Conn, flavor string, guid string) {
+func SendNotification(user *User, flavor string, guid string) {
   host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
-  result, err := c.Do("GET", redis.Args{}.Add("guid:"+guid)...)
+  result, err := redishandle.Do("GET", redis.Args{}.Add("guid:"+guid)...)
   if err != nil {
     panic(err)
   }
@@ -47,10 +48,10 @@ func SendNotification(user *User, c redis.Conn, flavor string, guid string) {
   var local_user *User = nil
   if identifier[:5] == "user:" {
     mode = "user"
-    local_user, _ = UserFromUid(c, identifier)
+    local_user, _ = UserFromUid(identifier)
   } else if identifier[:7] == "person:" {
     mode = "person"
-    person, _ = PersonFromUid(c, identifier)
+    person, _ = PersonFromUid(identifier)
   }
 
   notification := Notification{}
@@ -71,19 +72,19 @@ func SendNotification(user *User, c redis.Conn, flavor string, guid string) {
     revel.INFO.Println("flavor", flavor, "not understood")
     return
   }
-  notification.Insert(c, user)
+  notification.Insert(user)
 }
-func (self *Notification) Upsert(c redis.Conn) {
-  _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id).AddFlat(self)...)
+func (self *Notification) Upsert() {
+  _, errb := redishandle.Do("HMSET", redis.Args{}.Add(self.Id).AddFlat(self)...)
   if errb != nil {
     panic(errb)
   }
 }
 
-func (self *Notification) MarkAsRead(c redis.Conn, user *User) {
+func (self *Notification) MarkAsRead(user *User) {
   self.Read = true
-  self.Upsert(c)
-  _, errd := c.Do("HINCRBY", redis.Args{}.Add("user:"+user.Slug).
+  self.Upsert()
+  _, errd := redishandle.Do("HINCRBY", redis.Args{}.Add("user:"+user.Slug).
                              Add("NotificationCount").
                              Add(-1)...)
 
@@ -92,10 +93,10 @@ func (self *Notification) MarkAsRead(c redis.Conn, user *User) {
   }
 }
 
-func (self *Notification) Insert(c redis.Conn, user *User) bool {
-  self.Upsert(c)
+func (self *Notification) Insert(user *User) bool {
+  self.Upsert()
 
-  _, errc := c.Do("ZADD", redis.Args{}.Add(user.NotificationsKey()).
+  _, errc := redishandle.Do("ZADD", redis.Args{}.Add(user.NotificationsKey()).
                           Add(int32(time.Now().Unix())).
                           Add(self.Id)...)
 
@@ -103,7 +104,7 @@ func (self *Notification) Insert(c redis.Conn, user *User) bool {
     panic(errc)
   }
 
-  _, errd := c.Do("HINCRBY", redis.Args{}.Add("user:"+user.Slug).
+  _, errd := redishandle.Do("HINCRBY", redis.Args{}.Add("user:"+user.Slug).
                              Add("NotificationCount").
                              Add(1)...)
 
@@ -114,19 +115,19 @@ func (self *Notification) Insert(c redis.Conn, user *User) bool {
   return true
 }
 
-func ListCurrentNotifications(c redis.Conn, user *User) []*Notification {
-    result, errb := c.Do("ZRANGE", redis.Args{}.Add(user.NotificationsKey()).Add(0).Add(-1)...)
+func ListCurrentNotifications(user *User) []*Notification {
+    result, errb := redishandle.Do("ZRANGE", redis.Args{}.Add(user.NotificationsKey()).Add(0).Add(-1)...)
     if errb != nil {
       panic(errb)
     }
     identifiers, _ := redis.Strings(result, nil)
-    return materializeNotificationList(c, identifiers, false)
+    return materializeNotificationList(identifiers, false)
 }
 
-func materializeNotificationList(c redis.Conn, identifiers []string, show_read bool) []*Notification { 
+func materializeNotificationList(identifiers []string, show_read bool) []*Notification { 
     notifications := []*Notification{}
     for _,element := range identifiers {
-      notification, err := NotificationFromId(c, element)
+      notification, err := NotificationFromId(element)
       if err == nil {
         if show_read == true || notification.Read == false {
           notifications = append(notifications, notification)

@@ -1,5 +1,6 @@
 package models
 
+import "kernl/app/lib/redishandle"
 import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
 import "github.com/dustin/go-humanize"
@@ -39,13 +40,13 @@ func (self *Post) CommentsKey() string {
   return "comments:"+self.Guid
 }
 
-func (self *Post) Person(rc redis.Conn) (*Person, error) {
-  return PersonFromUid(rc, "person:"+self.AccountIdentifier)
+func (self *Post) Person() (*Person, error) {
+  return PersonFromUid("person:"+self.AccountIdentifier)
 }
 
-func PostFromId(c redis.Conn, id string) (*Post, error) {
+func PostFromId(id string) (*Post, error) {
   post := Post{}
-  v, errb := redis.Values(c.Do("HGETALL", id))
+  v, errb := redis.Values(redishandle.Do("HGETALL", id))
   if errb != nil {
     return nil, errb
   }
@@ -59,16 +60,16 @@ func PostFromId(c redis.Conn, id string) (*Post, error) {
   return &post, nil
 }
 
-func (self *Post) Insert(c redis.Conn, sender *Person) bool {
+func (self *Post) Insert(sender *Person) bool {
   // sanity check so we only insert or upsert ourselves
   self.AuthorUrl = sender.LocalUrl()
-  result, err := c.Do("GET", redis.Args{}.Add("guid:"+self.Guid)...)
+  result, err := redishandle.Do("GET", redis.Args{}.Add("guid:"+self.Guid)...)
   if err != nil {
     panic(err)
   }
   identifier, _ := redis.String(result, nil)
   if identifier == "" {
-    _, erra := c.Do("SET", redis.Args{}.Add("guid:"+self.Guid).Add(self.Id())...)
+    _, erra := redishandle.Do("SET", redis.Args{}.Add("guid:"+self.Guid).Add(self.Id())...)
     if erra != nil {
       panic("data access problem")
     }
@@ -78,20 +79,20 @@ func (self *Post) Insert(c redis.Conn, sender *Person) bool {
   // if its a new user,
   // or if it matches a person
   if identifier == self.Id() {
-    _, errb := c.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
+    _, errb := redishandle.Do("HMSET", redis.Args{}.Add(self.Id()).AddFlat(self)...)
     if errb != nil {
       panic(errb)
     }
 
     // ok add this to the senders list of posts
-    _, errc := c.Do("ZADD", redis.Args{}.Add(sender.PostsKey()).
+    _, errc := redishandle.Do("ZADD", redis.Args{}.Add(sender.PostsKey()).
     Add(time.Now().Unix()).Add(self.Id())...)
     if errc != nil {
       panic(errc)
     }
 
     // ok add this to their receivers
-    self.DistributeToReceivers(c, sender)
+    self.DistributeToReceivers(sender)
 
     return true
   } 
@@ -99,9 +100,9 @@ func (self *Post) Insert(c redis.Conn, sender *Person) bool {
   return false
 }
 
-func (self *Post) DistributeToReceivers(c redis.Conn, sender *Person) {
-  user, user_err := UserFromGuid(c, sender.RemoteGuid)
-  results, errb := c.Do("ZRANGE", redis.Args{}.Add(sender.ConnectionsOutboundKey()).Add(0).Add(-1)...)
+func (self *Post) DistributeToReceivers(sender *Person) {
+  user, user_err := UserFromGuid(sender.RemoteGuid)
+  results, errb := redishandle.Do("ZRANGE", redis.Args{}.Add(sender.ConnectionsOutboundKey()).Add(0).Add(-1)...)
   if errb != nil {
     panic(errb)
   }
@@ -110,14 +111,14 @@ func (self *Post) DistributeToReceivers(c redis.Conn, sender *Person) {
   for _,identifier := range identifiers {
     if IsLocalIdentifier(identifier) {
       revel.INFO.Println("\tLOCAL, Distributing To", identifier)
-      _, errd := c.Do("ZADD", redis.Args{}.Add("feed:"+identifier).
+      _, errd := redishandle.Do("ZADD", redis.Args{}.Add("feed:"+identifier).
       Add(time.Now().Unix()).Add(self.Id())...)
       if errd != nil {
         panic(errd)
       }
     } else if user_err == nil {
       revel.INFO.Println("\tNOT LOCAL, Sending To", identifier)
-      recipient,err := PersonFromUid(c, "person:"+identifier)
+      recipient,err := PersonFromUid("person:"+identifier)
       if err == nil {
         result, r_err := SendStatusMessage(user, recipient, self) 
         if r_err != nil {

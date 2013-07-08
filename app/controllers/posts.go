@@ -9,10 +9,6 @@ type Posts struct {
 }
 
 func (c Posts) Create(message string) revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-
   // TODO: validation
   post := models.Post{
     Message: message,
@@ -23,8 +19,8 @@ func (c Posts) Create(message string) revel.Result {
     DisplayName: c.current_user().DisplayName,
   }
   // sender is ourself
-  sender := c.current_user().Person(rc)
-  post.Insert(rc, sender)
+  sender := c.current_user().Person()
+  post.Insert(sender)
   c.Flash.Success("Post Sent")
   return c.Redirect(Home.Index)
 }

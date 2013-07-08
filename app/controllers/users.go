@@ -18,10 +18,6 @@ func (c Users) Create(Slug string,
                       Password string, 
                       PasswordConfirmation string) revel.Result {
 
-      // get redis handle
-      rc := GetRedisConn()
-      defer rc.Close()
-
       user := models.User{}
       user.Slug = strings.ToLower(Slug)
       user.Email = strings.ToLower(Email)
@@ -31,7 +27,7 @@ func (c Users) Create(Slug string,
       c.Validation.Required(PasswordConfirmation == Password).Message("Password does not match")
 
       // validate user model
-      user.Validate(rc, c.Validation)
+      user.Validate(c.Validation)
 
       // shows errs if any
       if c.Validation.HasErrors() {
@@ -41,7 +37,7 @@ func (c Users) Create(Slug string,
       }
 
       user.PwdHash, _ = bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
-      err := user.Insert(rc)
+      err := user.Insert()
       if err != true {
         panic("oh no")
       }

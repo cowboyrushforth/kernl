@@ -12,47 +12,32 @@ type Connections struct {
 }
 
 func (c Connections) Index() revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
   user := c.current_user()
-  list := user.ListConnections(rc, true, true)
+  list := user.ListConnections( true, true)
   return c.Render(list)
 }
 
 func (c Connections) Inbound() revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
   user := c.current_user()
-  list := user.ListConnections(rc, true, false)
+  list := user.ListConnections(true, false)
   return c.Render(list)
 }
 
 func (c Connections) Outbound() revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
   user := c.current_user()
-  list := user.ListConnections(rc, false, true)
+  list := user.ListConnections(false, true)
   return c.Render(list)
 }
 
 func (c Connections) Blocked() revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
   user := c.current_user()
-  list := user.ListBlockedConnections(rc)
+  list := user.ListBlockedConnections()
   return c.Render(list)
 }
 
 func (c Connections) Mutual() revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
   user := c.current_user()
-  list := user.ListMutualConnections(rc)
+  list := user.ListMutualConnections()
   return c.Render(list)
 }
 
@@ -61,11 +46,8 @@ func (c Connections) New() revel.Result {
 }
 
 func (c Connections) Verify(q string) revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
   // see if we have this connection already
-  if c.current_user().HasOutboundConnection(rc, q) {
+  if c.current_user().HasOutboundConnection(q) {
     c.Flash.Error("You are already connected to "+q)
     return c.Redirect(Connections.Index)
   }
@@ -138,12 +120,8 @@ func (c Connections) Verify(q string) revel.Result {
 
 func (c Connections) Create(person models.Person) revel.Result {
 
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-
   // validate user model
-  person.Validate(rc, c.Validation)
+  person.Validate(c.Validation)
 
   // shows errs if any
   if c.Validation.HasErrors() {
@@ -155,7 +133,7 @@ func (c Connections) Create(person models.Person) revel.Result {
   // send salmon message to remote party
   // and save Person if successful
   success := false
-  err := person.Connect(rc, c.current_user()) 
+  err := person.Connect(c.current_user()) 
   if err == nil {
     success = true
   }

@@ -8,11 +8,8 @@ type Home struct {
 }
 
 func (c Home) Index() revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-  notifications := models.ListCurrentNotifications(rc, c.current_user())
-  feed := models.HomeFeedForUser(rc, c.current_user())
+  notifications := models.ListCurrentNotifications(c.current_user())
+  feed := models.HomeFeedForUser(c.current_user())
   return c.Render(notifications, feed)
 }
 

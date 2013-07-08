@@ -48,10 +48,7 @@ func (c Webfinger) Show(q string) revel.Result {
     q = strings.Replace(q, "acct:", "", 1)
     slug := strings.Replace(q, "@"+host_suffix, "", 1)
     if len(slug) > 0 {
-      // find user
-      rc := GetRedisConn()
-      defer rc.Close()
-      user, err := models.UserFromSlug(rc, slug)
+      user, err := models.UserFromSlug(slug)
       if err == nil {
         hcard := Link{Rel: "http://microformats.org/profile/hcard",
                      Xtype: "text/html",

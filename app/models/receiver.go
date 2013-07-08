@@ -7,7 +7,6 @@ package models
 
 import "github.com/robfig/revel"
 import "github.com/cowboyrushforth/gosalmon"
-import "github.com/garyburd/redigo/redis"
 import "encoding/base64"
 import "encoding/json"
 import "encoding/xml"
@@ -35,7 +34,7 @@ type DecryptedHeader struct {
   AuthorId string `xml:"author_id"`
 }
 
-func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sender *Person, payload string, err error) {
+func ParseVerifiedSalmonPayload(user *User, xmlstr string) (sender *Person, payload string, err error) {
   salmon := gosalmon.Salmon{}
   errs := salmon.DecodeFromXml(xmlstr)
   if errs != nil {
@@ -88,7 +87,7 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sende
    // now that we have seen who its from
    // get our versio of that public key
    // and verify the salmon sig
-   person, person_err := PersonFromUid(rc, "person:"+header.AuthorId)
+   person, person_err := PersonFromUid( "person:"+header.AuthorId)
    if person_err != nil {
      // we appear to not have this person.
      // try to finger them.
@@ -97,7 +96,7 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sende
      if person_err != nil {
        panic("can not locate person")
      }
-     person.Insert(rc)
+     person.Insert()
    }
    
 
@@ -121,7 +120,7 @@ func ParseVerifiedSalmonPayload(rc redis.Conn, user *User, xmlstr string) (sende
    return nil, "", errors.New("Salmon Not Verified")
 }
 
-func ParsePublicVerifiedSalmonPayload(rc redis.Conn, xmlstr string) (sender *Person, payload string, err error) {
+func ParsePublicVerifiedSalmonPayload(xmlstr string) (sender *Person, payload string, err error) {
   salmon := gosalmon.Salmon{}
   errs := salmon.DecodeFromXml(xmlstr)
   if errs != nil {
@@ -132,7 +131,7 @@ func ParsePublicVerifiedSalmonPayload(rc redis.Conn, xmlstr string) (sender *Per
    // now that we have seen who its from
    // get our versio of that public key
    // and verify the salmon sig
-   person, person_err := PersonFromUid(rc, "person:"+salmon.AuthorId)
+   person, person_err := PersonFromUid( "person:"+salmon.AuthorId)
    if person_err != nil {
      // we appear to not have this person.
      // try to finger them.
@@ -141,7 +140,7 @@ func ParsePublicVerifiedSalmonPayload(rc redis.Conn, xmlstr string) (sender *Per
      if person_err != nil {
        panic("can not locate person")
      }
-     person.Insert(rc)
+     person.Insert()
    }
    
    salmon.RSAPubKey = person.RSAPubKey

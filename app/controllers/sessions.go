@@ -13,10 +13,7 @@ func (c Sessions) New() revel.Result {
 }
 
 func (c Sessions) Create(slug string, password string) revel.Result {
-  // TODO Validations
-  rc := GetRedisConn()
-  defer rc.Close()
-  u, err := models.UserFromSlug(rc, slug)
+  u, err := models.UserFromSlug(slug)
   if err == nil {
     errb := bcrypt.CompareHashAndPassword(u.PwdHash, []byte(password))
     if errb == nil {

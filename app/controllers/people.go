@@ -8,10 +8,7 @@ type People struct {
 }
 
 func (c People) Show(slug string) revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-  target, err := models.UserFromSlug(rc,slug)
+  target, err := models.UserFromSlug(slug)
   if err != nil {
     return c.NotFound("person not found")
   }
@@ -22,10 +19,10 @@ func (c People) Show(slug string) revel.Result {
   if c.current_user().AccountIdentifier == target.AccountIdentifier {
     is_self = true
   } else {
-    if target.SharesWithUser(rc, c.current_user().AccountIdentifier) {
+    if target.SharesWithUser(c.current_user().AccountIdentifier) {
       connected_inbound = true
     }
-    if c.current_user().SharesWithUser(rc, target.AccountIdentifier) {
+    if c.current_user().SharesWithUser(target.AccountIdentifier) {
       connected_outbound = true
     }
   }
@@ -33,19 +30,16 @@ func (c People) Show(slug string) revel.Result {
 }
 
 func (c People) ShowRemote(guid string) revel.Result {
-  // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-  target, err := models.PersonFromGuid(rc,guid)
+  target, err := models.PersonFromGuid(guid)
   if err != nil {
     return c.NotFound("person not found")
   }
   connected_inbound := false
   connected_outbound := false
-  if c.current_user().IsSharedWithByUser(rc, target.AccountIdentifier) {
+  if c.current_user().IsSharedWithByUser(target.AccountIdentifier) {
     connected_inbound = true
   }
-  if c.current_user().SharesWithUser(rc, target.AccountIdentifier) {
+  if c.current_user().SharesWithUser(target.AccountIdentifier) {
     connected_outbound = true
   }
   return c.Render(target, connected_inbound, connected_outbound)

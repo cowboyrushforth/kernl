@@ -9,15 +9,13 @@ type Notifications struct {
 
 func (c Notifications) Ack(id string) revel.Result {
   // get redis handle
-  rc := GetRedisConn()
-  defer rc.Close()
-  notification, err := models.NotificationFromId(rc, id)
+  notification, err := models.NotificationFromId(id)
   if err != nil || notification.Owner != c.current_user().AccountIdentifier {
     c.Response.Status = 400
     return c.RenderText("")
   }
 
-  notification.MarkAsRead(rc, c.current_user())
+  notification.MarkAsRead(c.current_user())
 
   return c.Redirect(Home.Index)
 }

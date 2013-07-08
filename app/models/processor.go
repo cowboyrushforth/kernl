@@ -1,6 +1,5 @@
 package models
 
-import "github.com/garyburd/redigo/redis"
 import "github.com/robfig/revel"
 import "encoding/xml"
 import "errors"
@@ -41,7 +40,7 @@ type XPackage struct {
   Post XPost `xml:"post"`
 }
 
-func ParseAndProcessVerifiedPayload(c redis.Conn, user *User, sender *Person, payload string) error {
+func ParseAndProcessVerifiedPayload(user *User, sender *Person, payload string) error {
   v := XPackage{}
   err := xml.Unmarshal([]byte(payload), &v )
   if err != nil {
@@ -50,33 +49,33 @@ func ParseAndProcessVerifiedPayload(c redis.Conn, user *User, sender *Person, pa
   flavor := v.Post.Flavor.XMLName.Local
   switch flavor {
   case "request":
-    return HandleInboundRequest(c, user, sender, v)
+    return HandleInboundRequest(user, sender, v)
   case "profile":
-    return HandleInboundProfile(c, user, sender, v)
+    return HandleInboundProfile(user, sender, v)
   case "status_message":
-    return HandleInboundStatusMessage(c, sender, v)
+    return HandleInboundStatusMessage(sender, v)
   case "participation":
-    return HandleInboundParticipation(c, sender, v)
+    return HandleInboundParticipation(sender, v)
   case "comment":
-    return HandleInboundComment(c, user, sender, v)
+    return HandleInboundComment(user, sender, v)
   }
   return errors.New("flavor not understood")
 }
 
 // handle a request stanza, for when someone notifies
 // they wish to start sharing with us
-func HandleInboundRequest(c redis.Conn, user *User, sender *Person, xpkg XPackage) error {
+func HandleInboundRequest(user *User, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundRequest, adding sender", xpkg.Post.Flavor.SenderHandle, "to", xpkg.Post.Flavor.RecipientHandle)
-  user.AddConnection(c, sender, true, false)
-  SendNotification(user, c, "share_started", sender.RemoteGuid)
+  user.AddConnection(sender, true, false)
+  SendNotification(user, "share_started", sender.RemoteGuid)
   return nil
 }
 
 // handle a profile stanza, unclear
 // how important this is at the moment
-func HandleInboundProfile(c redis.Conn, user *User, sender *Person, xpkg XPackage) error {
+func HandleInboundProfile(user *User, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundProfile, diaspora profile", xpkg.Post.Flavor.DiasporaHandle)
-  _, person_err := PersonFromUid(c, "person:"+xpkg.Post.Flavor.DiasporaHandle)
+  _, person_err := PersonFromUid("person:"+xpkg.Post.Flavor.DiasporaHandle)
   if person_err != nil {
     // we appear to not have this person.
     // try to finger them.
@@ -84,12 +83,12 @@ func HandleInboundProfile(c redis.Conn, user *User, sender *Person, xpkg XPackag
     if person_err != nil {
       panic("can not locate user")
     }
-    person.Insert(c)
+    person.Insert()
   }
   return nil
 }
 
-func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) error {
+func HandleInboundStatusMessage(sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundStatusMessage")
   ts,_ := time.Parse("2006-01-02 15:04:05 MST", xpkg.Post.Flavor.CreatedAt)
   post := Post{
@@ -100,16 +99,16 @@ func HandleInboundStatusMessage(c redis.Conn, sender *Person, xpkg XPackage) err
     Public: xpkg.Post.Flavor.Public,
     CreatedAt: ts.Unix(),
   }
-  post.Insert(c, sender)
+  post.Insert(sender)
   return nil
 }
 
-func HandleInboundParticipation(c redis.Conn, sender *Person, xpkg XPackage) error {
+func HandleInboundParticipation(sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundParticipation") 
   return nil
 }
 
-func HandleInboundComment(c redis.Conn, user *User, sender *Person, xpkg XPackage) error {
+func HandleInboundComment(user *User, sender *Person, xpkg XPackage) error {
   revel.INFO.Println("HandleInboundComment") 
   comment := Comment{
         DisplayName: sender.DisplayName,
@@ -119,6 +118,6 @@ func HandleInboundComment(c redis.Conn, user *User, sender *Person, xpkg XPackag
         AccountIdentifier: xpkg.Post.Flavor.DiasporaHandle,
         CreatedAt: time.Now().Unix(),
   }
-  comment.Insert(c, sender)
+  comment.Insert(sender)
   return nil
 }

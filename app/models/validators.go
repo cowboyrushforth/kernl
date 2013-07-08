@@ -1,15 +1,14 @@
 package models
 
 import "github.com/garyburd/redigo/redis"
+import "kernl/app/lib/redishandle"
 import "fmt"
 
-type EmailDoesNotExist struct {
-   Redis redis.Conn
-}
+type EmailDoesNotExist struct {}
 
 func (self EmailDoesNotExist) IsSatisfied(i interface{}) bool {
   email := i.(string) 
-  exists, err := redis.Bool(self.Redis.Do("EXISTS", "email:"+email))
+  exists, err := redis.Bool(redishandle.Do("EXISTS", "email:"+email))
   if err != nil {
     panic("data access problem")
   }
@@ -29,7 +28,7 @@ type SlugDoesNotExist struct {
 
 func (self SlugDoesNotExist) IsSatisfied(i interface{}) bool {
   slugkey := fmt.Sprintf("user:%s", i.(string))
-  exists, err := redis.Bool(self.Redis.Do("EXISTS", slugkey))
+  exists, err := redis.Bool(redishandle.Do("EXISTS", slugkey))
   if err != nil {
     panic("data access problem")
   }
