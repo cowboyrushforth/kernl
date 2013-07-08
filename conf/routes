@@ -22,6 +22,7 @@ GET     /hcards/:slug                           Hcards.Show
 POST    /receive/users/:guid                    Salmon.Receive
 POST    /receive/public                         Salmon.ReceivePublic
 GET     /public/:slug/feed.atom                 Public.Index
+GET     /people/:guid                           Public.PublicFeed
 GET     /r/:guid                                People.ShowRemote
 GET     /u/:slug                                People.Show
 GET     /notifications/:id/ack                  Notifications.Ack

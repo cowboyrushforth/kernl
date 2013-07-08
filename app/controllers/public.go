@@ -28,3 +28,6 @@ func (c Public) Index(slug string) revel.Result {
   return c.RenderText(string(atom))
 }
 
+func (c Public) PublicFeed() revel.Result {
+  return c.RenderJson([]string{})
+}

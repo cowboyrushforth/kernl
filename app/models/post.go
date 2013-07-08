@@ -1,11 +1,10 @@
 package models
 
 import "github.com/garyburd/redigo/redis"
-import "time"
-import "errors"
 import "github.com/robfig/revel"
 import "github.com/dustin/go-humanize"
-
+import "time"
+import "errors"
 
 type Photo struct {
   Guid string
@@ -28,6 +27,7 @@ type Post struct {
   CreatedAt int64
   Likes int
   Dislikes int
+  AuthorUrl string
   Photo Photo `redis:"-"`
 }
 
@@ -37,6 +37,10 @@ func (self *Post) Id() string {
 
 func (self *Post) CommentsKey() string {
   return "comments:"+self.Guid
+}
+
+func (self *Post) Person(rc redis.Conn) (*Person, error) {
+  return PersonFromUid(rc, "person:"+self.AccountIdentifier)
 }
 
 func PostFromId(c redis.Conn, id string) (*Post, error) {
@@ -57,6 +61,7 @@ func PostFromId(c redis.Conn, id string) (*Post, error) {
 
 func (self *Post) Insert(c redis.Conn, sender *Person) bool {
   // sanity check so we only insert or upsert ourselves
+  self.AuthorUrl = sender.LocalUrl()
   result, err := c.Do("GET", redis.Args{}.Add("guid:"+self.Guid)...)
   if err != nil {
     panic(err)
@@ -77,7 +82,6 @@ func (self *Post) Insert(c redis.Conn, sender *Person) bool {
     if errb != nil {
       panic(errb)
     }
-
 
     // ok add this to the senders list of posts
     _, errc := c.Do("ZADD", redis.Args{}.Add(sender.PostsKey()).
