@@ -121,8 +121,6 @@ func (self *Post) DistributeToReceivers(c redis.Conn, sender *Person) {
           panic(result.StatusCode)
         }
       }
-    } else {
-      revel.INFO.Println("\tUSER NOT FOUND", sender.RemoteGuid, "x")
     }
   }
 }
