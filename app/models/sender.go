@@ -15,6 +15,7 @@ import "encoding/base64"
 import "encoding/pem"
 import "net/http"
 import "net/url"
+import "time"
 
 // sends a 'start sharing' notification from
 // the owner of this person entry to the person 
@@ -31,6 +32,37 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
 
   payload := strings.Replace(template, "$sender", user.AccountIdentifier, 1)
   payload = strings.Replace(payload, "$recipient", person.AccountIdentifier, 1)
+  return sendSalmon(payload, user, person)
+}
+
+func SendStatusMessage(user *User, person *Person, post *Post) (resp *http.Response, err error) {
+        template := `<XML>
+  <post>
+    <status_message>
+      <raw_message>$status_message</raw_message>
+      <guid>$guid</guid>
+      <diaspora_handle>$sender</diaspora_handle>
+      <public>$public</public>
+      <created_at>$timestamp</created_at>
+    </status_message>
+  </post>
+</XML>`
+
+  payload := strings.Replace(template, "$status_message", post.Message, 1)
+  payload = strings.Replace(payload, "$guid", post.Guid, 1)
+  payload = strings.Replace(payload, "$sender", user.AccountIdentifier, 1)
+  payload = strings.Replace(payload, "$timestamp", time.Unix(post.CreatedAt, 0).Format("2006-01-02 15:04:05 MST"), 1)
+
+  post.Public = false // FIXME
+  if post.Public == true {
+    payload = strings.Replace(payload, "$public", "true", 1)
+  } else {
+    payload = strings.Replace(payload, "$public", "false", 1)
+  }
+
+  payload = strings.Replace(payload, "$sender", user.AccountIdentifier, 1)
+  payload = strings.Replace(payload, "$recipient", person.AccountIdentifier, 1)
+
   return sendSalmon(payload, user, person)
 }
 
@@ -113,8 +145,8 @@ func generateEncryptionHeader(user *User, person *Person) (string, []byte, []byt
                                  base64.StdEncoding.EncodeToString(outer_key), 1)
 
   // encrypt outer bundle using recipients public key
-  braw, _ := base64.StdEncoding.DecodeString(person.RSAPubKey)
-  p, _ := pem.Decode(braw)
+//  braw, _ := base64.StdEncoding.DecodeString(person.RSAPubKey)
+  p, _ := pem.Decode([]byte(person.RSAPubKey))
   if p == nil {
     panic("could not parse public key")
   }

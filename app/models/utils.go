@@ -4,6 +4,7 @@ import "encoding/hex"
 import "crypto/rand"
 import "crypto/sha256"
 import "strings"
+import "github.com/robfig/revel"
 
 func RandomString(n int) string {
   const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -48,4 +49,11 @@ func WordScore(word string) int {
     pos -= 1
   }
   return score
+}
+
+func IsLocalIdentifier(identifier string) bool {
+  host_suffix := revel.Config.StringDefault("host.suffix", "localhost:9000")
+  l := len(host_suffix)
+  q := len(identifier) - (l+1)
+  return identifier[q:] == "@"+host_suffix
 }

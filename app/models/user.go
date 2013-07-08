@@ -310,7 +310,7 @@ func (self *User) IsSharedWithByUser(c redis.Conn, account_identifier string) bo
 
 // find or create a Person for this user
 func (self *User) Person(rc redis.Conn) (*Person) {
-  person, err := PersonFromGuid(rc, self.Guid)
+  person, err := PersonFromUid(rc, "person:"+self.AccountIdentifier)
   if err != nil {
      // we appear to not have this person.
      // try to finger them.
