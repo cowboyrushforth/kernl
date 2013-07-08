@@ -3,7 +3,12 @@ package models
 import "github.com/garyburd/redigo/redis"
 
 func HomeFeedForUser(c redis.Conn, user *User) []*Post {
-  results, err := c.Do("ZRANGE", redis.Args{}.Add("feed:"+user.AccountIdentifier).Add(0).Add(20)...)
+  start := 0
+  limit := 20
+  results, err := c.Do("SORT", redis.Args{}.Add("feed:"+user.AccountIdentifier).
+                        Add("LIMIT").Add(start).Add(limit).
+                        Add("BY").Add("*->CreatedAt").
+                        Add("DESC")...)
   if err != nil {
     panic(err)
   }
