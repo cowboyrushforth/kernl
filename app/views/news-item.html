@@ -11,8 +11,10 @@
     ·
     <a href="#" class="news-comment">comment</a>
     ·
+    {{if .Public}}
     <a href="#" class="news-share">share</a>
     ·
+    {{end}}
     <span class="time">{{.HumanTime}}</span>
   </div>
   <div class="news-footer">
