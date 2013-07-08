@@ -100,19 +100,17 @@ func (self *Post) DistributeToReceivers(c redis.Conn, sender *Person) {
   identifiers, _ := redis.Strings(results, nil)
   identifiers = append(identifiers, sender.AccountIdentifier)
   for _,identifier := range identifiers {
-    revel.INFO.Println("distributing to", identifier)
     if IsLocalIdentifier(identifier) {
-      revel.INFO.Println("\tLOCAL")
+      revel.INFO.Println("\tLOCAL, Distributing To", identifier)
       _, errd := c.Do("ZADD", redis.Args{}.Add("feed:"+identifier).
       Add(time.Now().Unix()).Add(self.Id())...)
       if errd != nil {
         panic(errd)
       }
     } else if user_err == nil {
-      revel.INFO.Println("\tNOT LOCAL", identifier)
+      revel.INFO.Println("\tNOT LOCAL, Sending To", identifier)
       recipient,err := PersonFromUid(c, "person:"+identifier)
       if err == nil {
-        revel.INFO.Println("\t\tHRM")
         result, r_err := SendStatusMessage(user, recipient, self) 
         if r_err != nil {
           panic(r_err)
