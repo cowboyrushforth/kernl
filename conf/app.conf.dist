@@ -37,9 +37,9 @@ log.warn.output  = stderr
 log.error.output = stderr
 
 [prod]
-host.prefix=https://spotman.net
-host.domain=spotman.net
-host.suffix=spotman.net
+host.prefix=https://mydomain.com
+host.domain=mydomain.com
+host.suffix=mydomain.com
 auth.allow_unsecure_fingering=false
 mode.dev=false
 results.pretty=false

@@ -135,3 +135,8 @@ func (self *Post) DistributeToReceivers(sender *Person) {
 func (self *Post) HumanTime() string {
   return humanize.Time(time.Unix(self.CreatedAt, 0))
 }
+
+func (self *Post) Comments() []*Comment {
+  c := []*Comment{}
+  return c
+}
