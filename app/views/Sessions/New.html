@@ -7,6 +7,7 @@
 {{if .errors}}Please fix errors marked below!{{end}}
 
 <form method="POST" action="{{url "Sessions.Create"}}">
+  <input type="hidden" name="return_to" value="{{.return_to}}" />
   <p class="{{if index .errors "slug"}}error{{end}}">
     <strong>Slug:</strong> 
     <input type="text" name="slug" value="{{index .flash "slug"}}" />
