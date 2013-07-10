@@ -10,7 +10,7 @@ type AccessToken struct {
     TokenSecret string
     ConsumerKey string
     RequestToken string
-    AccountIdentifier string
+    Slug string
     CreatedAt int64
     UpdatedAt int64
 }
@@ -36,7 +36,7 @@ func (self *AccessToken) Id() string {
 }
 
 func (self *AccessToken) Insert() bool {
-  if self.AccountIdentifier == "" ||
+  if self.Slug == "" ||
      self.RequestToken == "" ||
      self.ConsumerKey == "" {
        panic("missing fields")

@@ -13,7 +13,7 @@ type RequestToken struct {
     TokenSecret string
     Verifier string
     Authenticated bool
-    AccountIdentifier string
+    Slug string
     AccessToken string
     CreatedAt int64
     UpdatedAt int64

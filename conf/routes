@@ -42,6 +42,8 @@ POST   /oauth/access_token                      Oauth.AccessToken
 
 # api
 POST    /api/client/register                    Client.Register
+GET     /api/whoami                             Api.Whoami
+GET     /api/user/:slug/profile                 Api.Profile
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

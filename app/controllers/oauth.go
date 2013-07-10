@@ -62,8 +62,8 @@ func (c Oauth) Authorize(oauth_token string, verifier string) revel.Result {
     c.Response.Status = 400
     return c.RenderText("Token Invalid")
   }
-  if len(request_token.AccountIdentifier) > 0 && 
-    (request_token.AccountIdentifier != c.current_user().AccountIdentifier) {
+  if len(request_token.Slug) > 0 && 
+    (request_token.Slug != c.current_user().Slug) {
     c.Response.Status = 400
     return c.RenderText("Token Invalid")
   }
@@ -72,7 +72,7 @@ func (c Oauth) Authorize(oauth_token string, verifier string) revel.Result {
     panic(errb)
   }
 
-  request_token.AccountIdentifier = c.current_user().AccountIdentifier
+  request_token.Slug = c.current_user().Slug
   if request_token.Insert() != true {
     panic("data storage error")
   }
@@ -85,7 +85,7 @@ func (c Oauth) Authorize(oauth_token string, verifier string) revel.Result {
 
     // should we even make the access token yet?
     access_token := models.AccessToken{
-       AccountIdentifier: request_token.AccountIdentifier,
+       Slug: request_token.Slug,
        RequestToken: request_token.Token,
        ConsumerKey: request_token.ConsumerKey}
 
