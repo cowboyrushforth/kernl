@@ -32,6 +32,18 @@ func (c Oauth) RequestToken() revel.Result {
     return c.RenderText("FAIL")
   }
 
-  c.Response.Status = 400
-  return c.RenderText("WIP")
+  request_token := models.RequestToken{
+    ConsumerKey: req.ConsumerKey,
+    Callback: req.Callback}
+
+  if request_token.Insert() == false {
+    panic("data storage error")
+  }
+
+  reply := goa1.OAuthRequestTokenReply{
+    CallbackConfirmed: true,
+    Token: request_token.Token,
+    TokenSecret: request_token.TokenSecret}
+
+  return c.RenderText(goa1.RequestTokenPayload(&reply))
 }
