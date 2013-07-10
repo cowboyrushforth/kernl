@@ -14,14 +14,10 @@ type RegResult struct {
 }
 
 func (c Client) Register() revel.Result {
-
-  revel.INFO.Println("params")
-  revel.INFO.Println(c.Params)
-
   reg_type := c.Params.Get("type")
   if reg_type == "" ||
-  reg_type != "client_update" || 
-  reg_type != "client_access" {
+  reg_type != "client_update" &&
+  reg_type != "client_associate" {
     c.Response.Status = 400
     return c.RenderText("Invalid registration type")
   }

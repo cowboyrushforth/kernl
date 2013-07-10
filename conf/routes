@@ -34,6 +34,9 @@ POST    /login                                  Sessions.Create
 GET     /logout                                 Sessions.Destroy
 GET     /about                                  Content.About
 
+# oauth
+POST   /oauth/request_token                     Oauth.RequestToken
+
 # api
 POST    /api/client/register                    Client.Register
 
