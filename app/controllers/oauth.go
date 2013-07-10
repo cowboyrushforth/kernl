@@ -82,18 +82,21 @@ func (c Oauth) Authorize(oauth_token string, verifier string) revel.Result {
     if verifier != request_token.Verifier {
       panic("verifier problem")
     }
-     request_token.Used = true
-     request_token.Authenticated = true
-     if request_token.Insert() == false {
-       panic("data storage error")
-     }
 
-     access_token := models.AccessToken{
+    // should we even make the access token yet?
+    access_token := models.AccessToken{
        AccountIdentifier: request_token.AccountIdentifier,
        RequestToken: request_token.Token,
        ConsumerKey: request_token.ConsumerKey}
 
      if access_token.Insert() == false {
+       panic("data storage error")
+     }
+
+     request_token.Used = true
+     request_token.Authenticated = true
+     request_token.AccessToken = access_token.Token
+     if request_token.Insert() == false {
        panic("data storage error")
      }
 
@@ -110,4 +113,50 @@ func (c Oauth) Authorize(oauth_token string, verifier string) revel.Result {
   }
 
   return c.Render(request_token, client)
+}
+
+
+func (c Oauth) AccessToken() revel.Result {
+  revel.INFO.Println("hello there")
+  req, erra := goa1.ParseRequest(c.Request.Request) 
+  if erra != nil {
+    panic(erra)
+  }
+
+  client,errb := models.ClientFromConsumerKey(req.ConsumerKey)
+  if errb != nil {
+    panic(errb)
+  }
+
+  request_token,errc := models.RequestTokenFromToken(req.Token)
+  if errc != nil {
+    panic(errc)
+  }
+
+  if request_token.Token != req.Token {
+    panic("token mismatch")
+  }
+
+  if request_token.ConsumerKey != client.ConsumerKey {
+    panic("consumer key mismatch")
+  }
+
+  ok, errc := goa1.Validate(req, client.Secret, request_token.TokenSecret)
+  if errb != nil {
+    panic(errc)
+  }
+
+  if ok {
+    revel.INFO.Println("Request Token Verified")
+    access_token, errf := models.AccessTokenFromToken(request_token.AccessToken)
+    if errf != nil {
+      panic(errf)
+    }
+
+    return c.RenderText("oauth_token="+access_token.Token+"&oauth_token_secret="+access_token.TokenSecret)
+  }
+
+  revel.INFO.Println("Token NOT OK")
+  c.Response.Status = 400
+  return c.RenderText("FAIL")
 }

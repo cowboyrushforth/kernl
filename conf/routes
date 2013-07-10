@@ -37,6 +37,8 @@ GET     /about                                  Content.About
 # oauth
 POST   /oauth/request_token                     Oauth.RequestToken
 GET    /oauth/authorize                         Oauth.Authorize
+POST   /oauth/authorize                         Oauth.Authorize
+POST   /oauth/access_token                      Oauth.AccessToken
 
 # api
 POST    /api/client/register                    Client.Register
