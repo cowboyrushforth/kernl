@@ -7,20 +7,45 @@ type MediaLink struct {
   Url string `json:"string"`
 }
 
+type InnerLink struct {
+  Href string `json:"href,omitempty"`
+  Url string `json:"url,omitempty"`
+  TotalItems *int `json:"totalItems,omitempty"`
+}
+
+type Links struct {
+  Self *InnerLink `json:"self,omitempty"`
+  ActivityInbox *InnerLink `json:"activity-inbox,omitempty"`
+  ActivityOutbox *InnerLink `json:"activity-outbox,omitempty"`
+}
+
+type PumpIo struct {
+  Shared bool `json:"shared"`
+  Followed bool `json:"followed"`
+}
+
 type ActivityObject struct {
   Attachments []string `json:"attachments,omitempty"`
   Author *ActivityObject `json:"author,omitempty"`
-  Content string `json:"content"`
+  Content string `json:"content,omitempty"`
   DisplayName string `json:"displayName"`
+  PreferredUsername string `json:"preferredUsername"`
   DownstreamDuplicates []string `json:"downstreamDuplicates,omitempty"`
   Id string `json:"id"`
   Image *MediaLink `json:"image,omitempty"`
   ObjectType string `json:"objectType"`
-  Published string `json:"published"`
-  Summary string `json:"summary"`
+  Published string `json:"published,omitempty"`
+  Summary string `json:"summary,omitempty"`
   UpdatedAt string `json:"updated"`
   UpstreamDuplicates []string `json:"upstreamDuplicates,omitempty"`
   Url string `json:"url"`
+  Links *Links `json:"links,omitempty"`
+  Favorites *InnerLink `json:"favorites,omitempty"`
+  Lists *InnerLink `json:"lists,omitempty"`
+  Followers *InnerLink `json:"followers,omitempty"`
+  Following *InnerLink `json:"following,omitempty"`
+  Liked bool `json:"liked"`
+  PumpIo PumpIo `json:"pump_io"`
 }
 
 type Activity struct {

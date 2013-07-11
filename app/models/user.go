@@ -344,8 +344,23 @@ func (self *User) ActivityObject() (*ActivityObject) {
   activity_object := ActivityObject{ObjectType: "Person"}
   activity_object.DisplayName = self.DisplayName
   activity_object.Id = self.Guid
+  activity_object.PreferredUsername = self.DisplayName
   activity_object.UpdatedAt = time.Now().Format("2006-01-02T15:04:05.00-07:00")
   activity_object.Url = host_prefix + "/u/" + self.Slug
+  activity_object.Links = &Links{
+    Self: &InnerLink{Href: "xx"},
+    ActivityInbox: &InnerLink{Href: host_prefix+"/api/user/"+self.Slug+"/inbox"},
+    ActivityOutbox: &InnerLink{Href: host_prefix+"/api/user/"+self.Slug+"/feed"},
+  }
+  total_followers := 0
+  activity_object.Followers = &InnerLink{Url: host_prefix+"/api/user/"+self.Slug+"/followers", 
+                                         TotalItems: &total_followers}
+  activity_object.Following = &InnerLink{Url: host_prefix+"/api/user/"+self.Slug+"/following", 
+                                         TotalItems: &total_followers}
+  activity_object.Favorites = &InnerLink{Url: host_prefix+"/api/user/"+self.Slug+"/favorites",
+                                         TotalItems: &total_followers}
+  activity_object.Lists = &InnerLink{Url: host_prefix+"/api/user/"+self.Slug+"/lists/person",
+                                     TotalItems: &total_followers}
   return &activity_object
 }
 

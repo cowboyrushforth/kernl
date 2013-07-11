@@ -4,9 +4,17 @@ import "github.com/robfig/revel"
 import "kernl/app/models"
 import "github.com/cowboyrushforth/goa1"
 import "net/http"
+import "encoding/json"
+import "io"
+import "bytes"
 
 type Api struct {
   Kernl
+}
+
+type FeedPost struct {
+   Verb string `json:"verb"`
+   ActivityObject models.ActivityObject `json:"object"`
 }
 
 func (c Api) IsVerifiedRequest(http *http.Request) bool {
@@ -61,4 +69,19 @@ func (c Api) Profile(slug string) revel.Result {
     panic(err)
   }
   return c.RenderJson(user.ActivityObject())
+}
+
+func (c Api) FeedPost() revel.Result {
+  var b bytes.Buffer
+  var dest io.Writer = &b
+  _,_ = io.Copy(dest, c.Request.Body)
+  var payload FeedPost
+  err := json.Unmarshal(b.Bytes(), &payload)
+  if err != nil {
+    panic(err)
+  }
+  revel.INFO.Println(payload)
+
+  c.Response.Status = 400
+  return c.RenderText("")
 }

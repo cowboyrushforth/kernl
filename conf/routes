@@ -9,6 +9,7 @@ GET     /home                                   Home.Index
 GET     /.well-known/host-meta.json             Webfinger.IndexJson
 GET     /.well-known/host-meta                  Webfinger.Index
 GET     /wf                                     Webfinger.Show
+GET     /wf.json                                Webfinger.ShowJson 
 GET     /connections                            Connections.Index
 GET     /connections/inbound                    Connections.Inbound
 GET     /connections/outbound                   Connections.Outbound
@@ -44,6 +45,7 @@ POST   /oauth/access_token                      Oauth.AccessToken
 POST    /api/client/register                    Client.Register
 GET     /api/whoami                             Api.Whoami
 GET     /api/user/:slug/profile                 Api.Profile
+POST    /api/user/:slug/feed                    Api.FeedPost
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

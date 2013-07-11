@@ -73,9 +73,9 @@ func (c Webfinger) IndexJson() revel.Result {
   whoami := Link{Rel: "http://apinamespace.org/activitypub/whoami", 
   Href: host_prefix+"/api/whoami"}
 
-  xrd := JRD{Links: []Link{xml_lrdd, json_lrdd, reg, request, authorize, access, dialback, whoami}}
+  jrd := JRD{Links: []Link{xml_lrdd, json_lrdd, reg, request, authorize, access, dialback, whoami}}
 
-  return c.RenderJson(xrd)
+  return c.RenderJson(jrd)
 }
 
 
@@ -126,4 +126,39 @@ func (c Webfinger) Show(q string) revel.Result {
   } 
 
   return c.NotFound("user not found")
+}
+
+func (c Webfinger) ShowJson(q string) revel.Result {
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
+  host_suffix := revel.Config.StringDefault("host.suffix", "localhost:9000")
+
+  if strings.Contains(q, "@"+host_suffix) {
+    q = strings.Replace(q, "acct:", "", 1)
+    slug := strings.Replace(q, "@"+host_suffix, "", 1)
+    if len(slug) > 0 {
+      user, err := models.UserFromSlug(slug)
+      if err == nil {
+        page := Link{Rel: "http://webfinger.net/rel/profile-page",
+                     Xtype: "text/html",
+                     Href: host_prefix+"/u/"+user.Slug}
+        dialback  := Link{Rel: "dialback", Href: host_prefix+"/api/dialback"}
+        profile   := Link{Rel: "self", Href: host_prefix+"/api/user/"+user.Slug+"/profile"}
+        inbox     := Link{Rel: "activity-inbox", Href: host_prefix+"/api/user/"+user.Slug+"/inbox"} 
+        outbox    := Link{Rel: "activity-outbox", Href: host_prefix+"/api/user/"+user.Slug+"/feed"} 
+        followers := Link{Rel: "followers", Href: host_prefix+"/api/user/"+user.Slug+"/followers"} 
+        following := Link{Rel: "following", Href: host_prefix+"/api/user/"+user.Slug+"/following"} 
+        favorites := Link{Rel: "favorites", Href: host_prefix+"/api/user/"+user.Slug+"/favorites"} 
+        lists     := Link{Rel: "lists", Href: host_prefix+"/api/user/"+user.Slug+"/lists/person"} 
+
+        jrd := JRD{Links: []Link{page, dialback, profile, inbox, outbox, followers, following,
+                                 favorites, lists}}
+        return c.RenderJson(jrd)
+      } else {
+        revel.INFO.Println("could not find", slug)
+      }
+    }
+  } 
+
+  c.Response.Status = 404
+  return c.RenderText("not found")
 }
