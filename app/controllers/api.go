@@ -4,7 +4,6 @@ import "github.com/robfig/revel"
 import "kernl/app/models"
 import "github.com/cowboyrushforth/goa1"
 import "net/http"
-//import "strings"
 
 type Api struct {
   Kernl
@@ -49,6 +48,17 @@ func (c Api) Whoami() revel.Result {
   return c.RenderText("FAIL")
 }
 
-func (c Api) Profile() revel.Result {
-  return c.RenderJson(nil)
+func (c Api) Profile(slug string) revel.Result {
+  if c.current_user() == nil {
+    ok := c.IsVerifiedRequest(c.Request.Request)
+    if ok == false {
+      c.Response.Status = 400
+      return c.RenderText("")
+    }
+  }
+  user, err := models.UserFromSlug(slug)
+  if err != nil {
+    panic(err)
+  }
+  return c.RenderJson(user.ActivityObject())
 }

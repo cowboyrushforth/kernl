@@ -10,6 +10,7 @@ import "crypto/x509"
 import "encoding/pem"
 import "regexp"
 import "strings"
+import "time"
 
 type User struct {
   DisplayName  string
@@ -336,5 +337,15 @@ func (self *User) Person() (*Person) {
    }
 
    return person
+}
+
+func (self *User) ActivityObject() (*ActivityObject) {
+  host_prefix := revel.Config.StringDefault("host.prefix", "http://localhost:9000")
+  activity_object := ActivityObject{ObjectType: "Person"}
+  activity_object.DisplayName = self.DisplayName
+  activity_object.Id = self.Guid
+  activity_object.UpdatedAt = time.Now().Format("2006-01-02T15:04:05.00-07:00")
+  activity_object.Url = host_prefix + "/u/" + self.Slug
+  return &activity_object
 }
 
