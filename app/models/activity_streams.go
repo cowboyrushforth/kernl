@@ -49,15 +49,15 @@ type ActivityObject struct {
 }
 
 type Activity struct {
-  Actor ActivityObject `json:"actor"`
+  Actor *ActivityObject `json:"actor"`
   Content string `json:"content"`
-  Generator ActivityObject `json:"generator"`
+  Generator *ActivityObject `json:"generator"`
   Icon MediaLink `json:"icon"`
   Id string `json:"id"`
-  Object ActivityObject `json:"object"`
+  Object *ActivityObject `json:"object"`
   Published string `json:"published"`
-  Provider ActivityObject `json:"provider"`
-  Target ActivityObject `json:"target"`
+  Provider *ActivityObject `json:"provider"`
+  Target *ActivityObject `json:"target"`
   Title string `json:"title"`
   UpdatedAt string `json:"updated"`
   Url string `json:"url"`
