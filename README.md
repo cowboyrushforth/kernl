@@ -36,7 +36,8 @@ Fire up
 1. follow this tutorial http://robfig.github.io/revel/tutorial/createapp.html
 2. once you get the tutorial working you can clone this repository into GOPATH/src/ so its at GOPATH/src/kernl
 3. copy conf/app.conf.dist to conf/app.conf
-3. revel run kernl should fire it up on port 9000
+4. start a redis server to match the config in app.conf
+5. revel run kernl should fire it up on port 9000
 
 Gotchas
 ------------------
