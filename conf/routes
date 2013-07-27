@@ -11,8 +11,8 @@ GET     /.well-known/host-meta                  Webfinger.Index
 GET     /wf                                     Webfinger.Show
 GET     /wf.json                                Webfinger.ShowJson 
 GET     /connections                            Connections.Index
-GET     /connections/inbound                    Connections.Inbound
-GET     /connections/outbound                   Connections.Outbound
+GET     /connections/following                  Connections.Following
+GET     /connections/followers                  Connections.Followers
 GET     /connections/blocked                    Connections.Blocked
 GET     /connections/mutual                     Connections.Mutual
 GET     /connections/new                        Connections.New

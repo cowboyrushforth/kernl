@@ -1,0 +1,7 @@
+<ul class="nav nav-pills nav-stacked">
+  <li {{if eq .section "all"}}class="active"{{end}}><a href="/connections" title="All">All</a></li>
+  <li {{if eq .section "following"}}class="active"{{end}}><a href="/connections/following" title="Following">Following</a></li>
+  <li {{if eq .section "followers"}}class="active"{{end}}><a href="/connections/followers" title="Followers">Followers</a></li>
+  <li {{if eq .section "mutual"}}class="active"{{end}}><a href="/connections/mutual" title="Mutual">Mutual</a></li>
+  <li {{if eq .section "blocked"}}class="active"{{end}}><a href="/connections/blocked" title="Blocked">Blocked</a></li>
+</ul>

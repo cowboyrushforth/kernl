@@ -1,4 +1,5 @@
-{{set . "title" "kernl - connections"}}
+{{set . "title" "kernl - blocked"}}
+{{set . "section" "blocked"}}
 {{template "header.html" .}}
 <div class="container">
   <div class="row">
@@ -21,13 +22,7 @@
       </table>
     </div>
     <div class="span3">
-      <ul class="nav nav-pills nav-stacked">
-        <li><a href="/connections" title="All">All</a></li>
-        <li><a href="/connections/inbound" title="Inbound">Inbound</a></li>
-        <li><a href="/connections/outbound" title="Outbound">Outbound</a></li>
-        <li><a href="/connections/mutual" title="Mutual">Mutual</a></li>
-        <li class="active"><a href="/connections/blocked" title="Blocked">Blocked</a></li>
-      </ul>
+      {{template "Connections/Menu.html" .}}
     </div>
   </div>
 </div>

@@ -17,13 +17,13 @@ func (c Connections) Index() revel.Result {
   return c.Render(list)
 }
 
-func (c Connections) Inbound() revel.Result {
+func (c Connections) Following() revel.Result {
   user := c.current_user()
   list := user.ListConnections(true, false)
   return c.Render(list)
 }
 
-func (c Connections) Outbound() revel.Result {
+func (c Connections) Followers() revel.Result {
   user := c.current_user()
   list := user.ListConnections(false, true)
   return c.Render(list)
