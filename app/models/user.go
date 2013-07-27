@@ -96,12 +96,12 @@ func (self *User) ConnectionsKey() string {
   return "connections:" + self.AccountIdentifier
 }
 
-func (self *User) ConnectionsInboundKey() string {
-  return "connections:inbound:" + self.AccountIdentifier
+func (self *User) ConnectionsFollowingKey() string {
+  return "connections:following:" + self.AccountIdentifier
 }
 
-func (self *User) ConnectionsOutboundKey() string {
-  return "connections:outbound:" + self.AccountIdentifier
+func (self *User) ConnectionsFollowersKey() string {
+  return "connections:followers:" + self.AccountIdentifier
 }
 
 func (self *User) ConnectionsBlockedKey() string {
@@ -164,31 +164,30 @@ func (self *User) RSAPubKey() string {
   return string(pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: bytes}))
 }
 
-// marks in redis that we desire to share with 
-// said person
-func (self *User) AddConnection(person *Person, inbound bool, outbound bool) {
+// adds a relationship to a user.
+func (self *User) AddConnection(person *Person, following bool, follower bool) {
   // XXX: score could be alpha ranking
   //      score could be timestamp of adding
   // XXX: wrap in multi
   score := WordScore(person.DisplayName) 
   revel.INFO.Println("Adding Connection", person.AccountIdentifier, "to", self.AccountIdentifier,
-                     "inbound", inbound, "outbound", outbound, "score", score)
-  if inbound {
-    _, erra := redishandle.Do("ZADD", redis.Args{}.Add(self.ConnectionsInboundKey()).Add(score).Add(person.AccountIdentifier)...)
+                     "following", following, "follower", follower, "score", score)
+  if following {
+    _, erra := redishandle.Do("ZADD", redis.Args{}.Add(self.ConnectionsFollowingKey()).Add(score).Add(person.AccountIdentifier)...)
     if erra != nil {
       panic(erra)
     }
-    _, errb := redishandle.Do("ZADD", redis.Args{}.Add(person.ConnectionsOutboundKey()).Add(score).Add(self.AccountIdentifier)...)
+    _, errb := redishandle.Do("ZADD", redis.Args{}.Add(person.ConnectionsFollowersKey()).Add(score).Add(self.AccountIdentifier)...)
     if errb != nil {
       panic(errb)
     }
   }
-  if outbound {
-    _, errc := redishandle.Do("ZADD", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(score).Add(person.AccountIdentifier)...)
+  if follower {
+    _, errc := redishandle.Do("ZADD", redis.Args{}.Add(self.ConnectionsFollowersKey()).Add(score).Add(person.AccountIdentifier)...)
     if errc != nil {
       panic(errc)
     }
-    _, errd := redishandle.Do("ZADD", redis.Args{}.Add(person.ConnectionsInboundKey()).Add(score).Add(self.AccountIdentifier)...)
+    _, errd := redishandle.Do("ZADD", redis.Args{}.Add(person.ConnectionsFollowingKey()).Add(score).Add(self.AccountIdentifier)...)
     if errd != nil {
       panic(errd)
     }
@@ -207,7 +206,7 @@ type ConnectionList struct {
 func (self *User) AggregateConnections() {
   // TODO: optimize to not do this over frequently
   _, erra := redishandle.Do("ZUNIONSTORE", redis.Args{}.Add(self.ConnectionsKey()).Add("2").
-  Add(self.ConnectionsInboundKey()).Add(self.ConnectionsOutboundKey()).Add("AGGREGATE").Add("MIN")...)
+  Add(self.ConnectionsFollowingKey()).Add(self.ConnectionsFollowersKey()).Add("AGGREGATE").Add("MIN")...)
   if erra != nil {
     panic(erra)
   }
@@ -216,21 +215,21 @@ func (self *User) AggregateConnections() {
 func (self *User) IntersectConnections() {
   // TODO: optimize to not do this over frequently
   _, erra := redishandle.Do("ZINTERSTORE", redis.Args{}.Add(self.ConnectionsMutualKey()).Add("2").
-  Add(self.ConnectionsInboundKey()).Add(self.ConnectionsOutboundKey()).Add("AGGREGATE").Add("MIN")...)
+  Add(self.ConnectionsFollowingKey()).Add(self.ConnectionsFollowersKey()).Add("AGGREGATE").Add("MIN")...)
   if erra != nil {
     panic(erra)
   }
 }
 
-func (self *User) ListConnections(inbound bool, outbound bool) ConnectionList {
+func (self *User) ListConnections(following bool, followers bool) ConnectionList {
     key := ""
-    if inbound == true && outbound == true {
+    if following == true && followers == true {
       self.AggregateConnections()
       key = self.ConnectionsKey()
-    } else if inbound == true {
-      key = self.ConnectionsInboundKey()
-    } else if outbound == true {
-      key = self.ConnectionsOutboundKey()
+    } else if following == true {
+      key = self.ConnectionsFollowingKey()
+    } else if followers == true {
+      key = self.ConnectionsFollowersKey()
     }
 
     result, errb := redishandle.Do("ZRANGE", redis.Args{}.Add(key).Add(0).Add(-1)...)
@@ -286,8 +285,8 @@ func (self *User) HasConnection(q string) bool {
     return false
 }
 
-func (self *User) HasOutboundConnection(q string) bool {
-    result, err := redishandle.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(q)...)
+func (self *User) Follows(q string) bool {
+    result, err := redishandle.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsFollowingKey()).Add(q)...)
     if err != nil {
       panic(err)
     }
@@ -299,7 +298,7 @@ func (self *User) HasOutboundConnection(q string) bool {
 }
 
 func (self *User) SharesWithUser(account_identifier string) bool {
-    result, err := redishandle.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsOutboundKey()).Add(account_identifier)...)
+    result, err := redishandle.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsFollowingKey()).Add(account_identifier)...)
     if err != nil {
       panic(err)
     }
@@ -311,7 +310,7 @@ func (self *User) SharesWithUser(account_identifier string) bool {
 }
 
 func (self *User) IsSharedWithByUser(account_identifier string) bool {
-    result, err := redishandle.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsInboundKey()).Add(account_identifier)...)
+    result, err := redishandle.Do("ZSCORE", redis.Args{}.Add(self.ConnectionsFollowersKey()).Add(account_identifier)...)
     if err != nil {
       panic(err)
     }

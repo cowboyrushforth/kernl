@@ -1,40 +1,22 @@
-{{set . "title" "kernl - connections"}}
+{{set . "title" "kernl - verify connection"}}
 {{template "header.html" .}}
-
 {{if .has_errors }}
 We can not find that user right now, please check the address or try again later.
 {{else}}
 <div class="container">
   <div class="row">
-        <table class="table table-bordered">
-                <tr>
-                        <th>User</th><td>{{.subject}}</td>
-                </tr>
-                <tr>
-                        <th>Profile</th><td><a href="{{.profile_href}}" target="_blank">{{.profile_href}}</a></td>
-                </tr>
-                <tr>
-                        <th>Hcard</th><td>{{raw .hcard_body}}</td>
-                </tr>
-                        
-                <tr>
-                        <th>Server</th><td><a href="{{.seed_href}}" target="_blank">{{.seed_href}}</a></td>
-                </tr>
-                <tr>
-                        <th>Remote Guid</th><td>{{.guid}}</td>
-                </tr>
-        </table>
-        <form method="post" action="/connections">
-          <input type="hidden" name="person.RemoteGuid" value="{{.guid}}" />
-          <input type="hidden" name="person.DisplayName" value="{{.subject}}" />
-          <input type="hidden" name="person.ImageSrc" value=""/>
-          <input type="hidden" name="person.PodUrl" value="{{.seed_href}}" />
-          <input type="hidden" name="person.ProfileUrl" value="{{.profile_href}}" />
-          <input type="hidden" name="person.Email" value="" />
-          <input type="hidden" name="person.RSAPubKey" value="{{.pubkey}}" />
-          <input type="hidden" name="person.AccountIdentifier" value="{{.subject}}" />
-          <input type="submit" value="Connect" />
-        </form>
+    <table class="table table-bordered">
+      <tr>
+        <th>Account Identifier</th><td>{{.person.AccountIdentifier}}</td>
+      </tr>
+      <tr>
+        <th>Profile</th><td><a href="{{.person.ProfileUrl}}" target="_blank">{{.person.ProfileUrl}}</a></td>
+      </tr>
+    </table>
+    <form method="post" action="/connections">
+      <input type="hidden" name="ident" value="{{.person.AccountIdentifier}}" />
+      <input type="submit" value="Follow" />
+    </form>
   </div>
 </div>
 {{end}}

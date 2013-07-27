@@ -2,7 +2,7 @@ package models
 
 // sender prepared all bits
 // needed for salmon transmission
-// and sends
+// and sends to diaspora
 
 import "github.com/cowboyrushforth/gosalmon"
 import "strings"
@@ -20,7 +20,7 @@ import "time"
 // sends a 'start sharing' notification from
 // the owner of this person entry to the person 
 // described in it
-func SendSharingNotification(user *User, person *Person)  (resp *http.Response, err error) {
+func Diaspora_SendSharingNotification(user *User, person *Person)  (resp *http.Response, err error) {
   template := `<XML>
   <post>
     <request>
@@ -35,7 +35,7 @@ func SendSharingNotification(user *User, person *Person)  (resp *http.Response, 
   return sendSalmon(payload, user, person)
 }
 
-func SendStatusMessage(user *User, person *Person, post *Post) (resp *http.Response, err error) {
+func Diaspora_SendStatusMessage(user *User, person *Person, post *Post) (resp *http.Response, err error) {
         template := `<XML>
   <post>
     <status_message>

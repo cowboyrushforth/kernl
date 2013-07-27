@@ -102,7 +102,7 @@ func (self *Post) Insert(sender *Person) bool {
 
 func (self *Post) DistributeToReceivers(sender *Person) {
   user, user_err := UserFromGuid(sender.RemoteGuid)
-  results, errb := redishandle.Do("ZRANGE", redis.Args{}.Add(sender.ConnectionsOutboundKey()).Add(0).Add(-1)...)
+  results, errb := redishandle.Do("ZRANGE", redis.Args{}.Add(sender.ConnectionsFollowersKey()).Add(0).Add(-1)...)
   if errb != nil {
     panic(errb)
   }
@@ -120,12 +120,16 @@ func (self *Post) DistributeToReceivers(sender *Person) {
       revel.INFO.Println("\tNOT LOCAL, Sending To", identifier)
       recipient,err := PersonFromUid("person:"+identifier)
       if err == nil {
-        result, r_err := SendStatusMessage(user, recipient, self) 
-        if r_err != nil {
-          panic(r_err)
-        }
-        if result.StatusCode != 200 && result.StatusCode != 202 {
-          panic(result.StatusCode)
+        if recipient.AccountType == DIASPORA_ACCOUNT_TYPE {
+          result, r_err := Diaspora_SendStatusMessage(user, recipient, self) 
+          if r_err != nil {
+            panic(r_err)
+          }
+          if result.StatusCode != 200 && result.StatusCode != 202 {
+            panic(result.StatusCode)
+          }
+        } else if recipient.AccountType == PUMPIO_ACCOUNT_TYPE {
+          // XXX todo
         }
       }
     }
